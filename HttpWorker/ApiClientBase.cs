@@ -8,7 +8,7 @@ namespace HttpWorker
 {
     /// <summary>
     /// API base class.
-    /// Contains all API states and main methons.
+    /// Contains all API states and main methods.
     /// </summary>
     public abstract class ApiClientBase : INotifyPropertyChanged
     {
@@ -22,6 +22,9 @@ namespace HttpWorker
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Allow to setup HTTP header of requests.
+        /// </summary>
         public HttpRequestHeaders DefaultRequestHeaders
         {
             get

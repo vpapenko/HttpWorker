@@ -19,7 +19,7 @@ namespace HttpWorker
         TaskCompletionSource<T> TaskCompletionSource = new TaskCompletionSource<T>();
 
         /// <summary>
-        /// Contructor.
+        /// Constructor.
         /// </summary>
         /// <param name="responseConverter">Function to convert HTTP response to type T</param>
         public HttpCall(Func<HttpStatusCode, string, T> responseConverter)
@@ -35,7 +35,7 @@ namespace HttpWorker
         public Task<T> Task { get { return TaskCompletionSource.Task; } }
 
         /// <summary>
-        /// Functiont to set result of this call.
+        /// Function to set result of this call.
         /// </summary>
         /// <param name="statusCode"></param>
         /// <param name="response"></param>

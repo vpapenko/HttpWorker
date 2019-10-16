@@ -25,12 +25,12 @@ namespace ConsoleApp1
 
             public void Start()
             {
-                Console.WriteLine("How many requests? Try to turn enternet connection off while process of requests.");
+                Console.WriteLine("How many requests? Try to turn Internet connection off while process of requests.");
                 while (true)
                 {
                     if (int.TryParse(Console.ReadLine(), out int count))
                     {
-                        //Run all requests and don't waite for results.
+                        //Run all requests and don't wait for results.
                         for (var i = 1; i <= count; i++)
                         {
                             Run(i);
@@ -48,11 +48,11 @@ namespace ConsoleApp1
             {
                 Console.WriteLine("Request for id {0}", id.ToString());
                 var r = await api.TestMethod1(id);
-                Console.WriteLine("Request for id {0} is conpleted.", r["id"].ToString());
+                Console.WriteLine("Request for id {0} is completed.", r["id"].ToString());
             }
 
             /// <summary>
-            /// Print all updates of api statuses
+            /// Print all updates of API statuses
             /// </summary>
             /// <param name="sender"></param>
             /// <param name="e"></param>

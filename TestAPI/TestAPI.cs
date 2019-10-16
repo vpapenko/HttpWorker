@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace TestAPI
 {
     /// <summary>
-    /// Test inplementation of JSONPlaceholder API
+    /// Test implementation of JSONPlaceholder API
     /// </summary>
     public class JSONPlaceholderTestAPI
         : ApiClientBase
@@ -35,10 +35,10 @@ namespace TestAPI
         }
 
         /// <summary>
-        /// Function to conver strin HTTP responce to JObject
+        /// Function to convert string HTTP response to JObject
         /// </summary>
-        /// <param name="statusCode">HTTP statuce code of the request</param>
-        /// <param name="response">response from server</param>
+        /// <param name="statusCode">HTTP status code of the request</param>
+        /// <param name="response">Response from server</param>
         /// <returns></returns>
         private JObject TestMethod1ResponseConverter(HttpStatusCode statusCode, string response)
         {
@@ -52,7 +52,7 @@ namespace TestAPI
             }
             catch (JsonReaderException)
             {
-                throw new Exception("Invalid responce.");
+                throw new Exception("Invalid response.");
             }
         }
     }

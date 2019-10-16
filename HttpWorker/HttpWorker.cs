@@ -38,11 +38,11 @@ namespace HttpWorker
         public event RunWorkerCompletedEventHandler RunWorkerCompleted;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //Http client. Can be adition setup in API implementation
+        //HTTP client. Can be addition setup in API implementation
         public HttpClient Client { get; private set; } = new HttpClient();
 
         /// <summary>
-        /// Indicate that long time operetion is in process
+        /// Indicate that long time operation is in process
         /// </summary>
         public double LongOperationStartTime
         {
@@ -59,7 +59,7 @@ namespace HttpWorker
 
         /// <summary>
         /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
-        /// Also after this count of attempt we set NetworkNotAvailable statuse.
+        /// Also after this count of attempt we set NetworkNotAvailable statuses.
         /// </summary>
         public int RetrySleepTimer1 { get; set; } = 2;
         public int RetrySleepTime1 { get; set; } = 2000;
@@ -138,7 +138,7 @@ namespace HttpWorker
 
         /// <summary>
         /// Add new request.
-        /// Worker will start automaticaly
+        /// Worker will start automatically
         /// </summary>
         /// <param name="call"></param>
         public void Add(IHttpCall call)
@@ -148,7 +148,7 @@ namespace HttpWorker
         }
 
         /// <summary>
-        /// Start manualy
+        /// Start manually
         /// </summary>
         public void Start()
         {
@@ -160,7 +160,7 @@ namespace HttpWorker
         }
 
         /// <summary>
-        /// Stop manualy
+        /// Stop manually
         /// </summary>
         public void Stop()
         {
@@ -235,7 +235,7 @@ namespace HttpWorker
         /// <summary>
         /// Try to process HttpCall until success or manual stop.
         /// </summary>
-        /// <param name="bwAsync">BackgroundWorker to check if cncelation requested</param>
+        /// <param name="bwAsync">BackgroundWorker to check if cancellation requested</param>
         /// <param name="call">HttpCall to process</param>
         private void WorkUntilSuccess(BackgroundWorker bwAsync, IHttpCall call)
         {
@@ -266,7 +266,7 @@ namespace HttpWorker
         }
 
         /// <summary>
-        /// Try to make http request
+        /// Try to make HTTP request
         /// </summary>
         /// <param name="call">HttpCall to precess</param>
         /// <returns>Is request successful</returns>
