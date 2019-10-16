@@ -65,7 +65,7 @@ namespace HttpWorker
         public int RetrySleepTime1 { get; set; } = 2000;
 
         /// <summary>
-        /// If count of unsuccessful attempts we slow down more.
+        /// If count of unsuccessful attempts are higher we slow down more.
         /// </summary>
         public int RetrySleepTimer2 { get; set; } = 50;
         public int RetrySleepTime2 { get; set; } = 15000;
