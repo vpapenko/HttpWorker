@@ -1,0 +1,12 @@
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\bin\Debug\netstandard2.0\HttpWorker.dll
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.csprojAssemblyReference.cache
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.csproj.CoreCompileInputs.cache
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.AssemblyInfoInputs.cache
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.AssemblyInfo.cs
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\bin\Debug\netstandard2.0\TestAPI.deps.json
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\bin\Debug\netstandard2.0\TestAPI.dll
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\bin\Debug\netstandard2.0\TestAPI.pdb
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\bin\Debug\netstandard2.0\HttpWorker.pdb
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.csproj.CopyComplete
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.dll
+C:\Users\vpape\source\repos\HttpWorker\TestAPI\obj\Debug\netstandard2.0\TestAPI.pdb
