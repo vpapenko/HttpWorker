@@ -12,7 +12,7 @@ namespace HttpWorker
     /// It store all data to run request and contains Task to return result.
     /// </summary>
     /// <typeparam name="T">return type</typeparam>
-    public class HttpCall<T>
+    internal class HttpCall<T>
         : IHttpCall
     {
         readonly Func<HttpStatusCode, string, T> responseConverter;
@@ -30,8 +30,7 @@ namespace HttpWorker
         public HttpCallTypeEnum HttpType { get; set; }
         public Uri Uri { get; set; }
         public HttpContent Content { get; set; }
-
-
+        
         public Task<T> Task { get { return TaskCompletionSource.Task; } }
 
         /// <summary>

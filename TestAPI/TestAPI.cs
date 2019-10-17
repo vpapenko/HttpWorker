@@ -24,14 +24,8 @@ namespace TestAPI
         /// <returns></returns>
         public async Task<JObject> TestMethod1(int id)
         {
-            HttpCall<JObject> call = new HttpCall<JObject>(TestMethod1ResponseConverter)
-            {
-                HttpType = HttpCallTypeEnum.Get,
-                Uri = new Uri(baseUrl, string.Format("posts/{0}", id.ToString()))
-            };
-
-            AddCall(call);
-            return await call.Task;
+            var uri = new Uri(baseUrl, string.Format("posts/{0}", id.ToString()));
+            return await AddGetCall(uri, TestMethod1ResponseConverter);
         }
 
         /// <summary>
