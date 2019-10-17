@@ -283,6 +283,15 @@ namespace HttpWorker
                     case HttpCallTypeEnum.Post:
                         response = Client.PostAsync(call.Uri, call.Content).Result;
                         break;
+                    case HttpCallTypeEnum.Delete:
+                        response = Client.DeleteAsync(call.Uri).Result;
+                        break;
+                    case HttpCallTypeEnum.Put:
+                        response = Client.PutAsync(call.Uri, call.Content).Result;
+                        break;
+                    default:
+                        throw new NotSupportedException(string.Format("Not supported HttpCallTypeEnum: {0}"
+                            , HttpCallTypeEnum.Put.ToString()));
                 }
 
                 string responseString = "";
