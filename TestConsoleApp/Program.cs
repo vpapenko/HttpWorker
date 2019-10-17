@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TestAPI;
 
-namespace ConsoleApp1
+namespace TestConsoleApp
 {
     class Program
     {
@@ -11,7 +11,7 @@ namespace ConsoleApp1
             var asyncUI = new AsyncUI();
             asyncUI.Start();
         }
-        
+
         /// <summary>
         /// Class for simple async UI.
         /// </summary>
@@ -34,8 +34,8 @@ namespace ConsoleApp1
                         for (var i = 1; i <= count; i++)
                         {
                             Run(i);
-                            Console.WriteLine("All requests are send.");
                         }
+                        Console.WriteLine("All requests are send.");
                     }
                     else
                     {
