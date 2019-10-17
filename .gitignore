@@ -1,3 +1,9 @@
 /.vs
 /HttpWorker/obj
 /HttpWorker/bin
+/TestAPI/bin
+/TestAPI/obj
+/TestConsoleApp/bin
+/TestConsoleApp/obj
+bin
+obj
