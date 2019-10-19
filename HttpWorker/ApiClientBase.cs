@@ -141,15 +141,6 @@ namespace HttpWorker
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         
-        /// <summary>
-        /// Add request to queue.
-        /// </summary>
-        /// <param name="call"></param>
-        private void AddCall(IHttpCall call)
-        {
-            httpWorker.Add(call);
-        }
-
         private void HttpWorker_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(HttpWorker.NetworkNotAvailable))

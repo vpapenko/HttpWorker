@@ -47,8 +47,15 @@ namespace TestConsoleApp
             public async Task Run(int id)
             {
                 Console.WriteLine("Request for id {0}", id.ToString());
-                var r = await api.TestMethod1(id);
-                Console.WriteLine("Request for id {0} is completed.", r["id"].ToString());
+                try
+                {
+                    var r = await api.TestMethod1(id);
+                    Console.WriteLine("Request for id {0} is completed.", r["id"].ToString());
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Exception while call for id {0}. {1}", id.ToString(), ex.ToString());
+                }
             }
 
             /// <summary>
