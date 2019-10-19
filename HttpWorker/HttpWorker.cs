@@ -9,36 +9,28 @@ namespace HttpWorker
 {
     internal class HttpWorker : INotifyPropertyChanged
     {
-        // BackgroundWorker for processing of HttpCall queue
-        readonly BackgroundWorker backgroundWorker = new BackgroundWorker();
+        ///Dictionary for unprocessed HttpCall
+        readonly ConcurrentDictionary<IHttpCall, bool> concurrentDictionary = new ConcurrentDictionary<IHttpCall, bool>();
 
-        //Queue for HttpCall
-        readonly ConcurrentQueue<IHttpCall> queue = new ConcurrentQueue<IHttpCall>();
-
-        //Timer to switch LongOperation property.
+        ///Timer to switch LongOperation property.
         readonly System.Timers.Timer longOperationTimer;
 
         bool networkNotAvailable;
         bool longOperationInProcess;
-        bool longRun;
         bool working;
-        double longOperationStartTime = 2000;
 
 
         public HttpWorker()
         {
-            longOperationTimer = new System.Timers.Timer(longOperationStartTime);
+            longOperationTimer = new System.Timers.Timer(2000);
             longOperationTimer.Elapsed += LongOperationTimer_Elapsed;
             longOperationTimer.AutoReset = false;
             longOperationTimer.Enabled = false;
-            SetupWorker();
         }
 
-
-        public event RunWorkerCompletedEventHandler RunWorkerCompleted;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //HTTP client. Can be addition setup in API implementation
+        ///HTTP client. Can be addition setup in API implementation
         public HttpClient Client { get; private set; } = new HttpClient();
 
         /// <summary>
@@ -48,11 +40,10 @@ namespace HttpWorker
         {
             get
             {
-                return longOperationStartTime;
+                return longOperationTimer.Interval;
             }
             set
             {
-                longOperationStartTime = value;
                 longOperationTimer.Interval = value;
             }
         }
@@ -69,15 +60,6 @@ namespace HttpWorker
         /// </summary>
         public int RetrySleepTimer2 { get; set; } = 50;
         public int RetrySleepTime2 { get; set; } = 15000;
-
-
-        public IHttpCall[] Queue
-        {
-            get
-            {
-                return queue.ToArray();
-            }
-        }
 
         /// <summary>
         /// Indicate that network is not available
@@ -143,37 +125,11 @@ namespace HttpWorker
         /// <param name="call"></param>
         public void Add(IHttpCall call)
         {
-            queue.Enqueue(call);
-            Start();
-        }
-
-        /// <summary>
-        /// Start manually
-        /// </summary>
-        public void Start()
-        {
+            concurrentDictionary.TryAdd(call, true);
             longOperationTimer.Start();
-            if (!backgroundWorker.IsBusy)
-            {
-                backgroundWorker.RunWorkerAsync();
-            }
-        }
-
-        /// <summary>
-        /// Stop manually
-        /// </summary>
-        public void Stop()
-        {
-            longOperationTimer.Stop();
-            if (backgroundWorker.IsBusy)
-            {
-                backgroundWorker.CancelAsync();
-            }
-        }
-
-        public void Dispose()
-        {
-            Stop();
+            Action<IHttpCall> processcallUntilSuccess = WorkUntilSuccess;
+            Working = true;
+            ThreadPool.QueueUserWorkItem(processcallUntilSuccess, call, true);
         }
 
 
@@ -182,66 +138,20 @@ namespace HttpWorker
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void SetupWorker()
-        {
-            backgroundWorker.WorkerReportsProgress = true;
-            backgroundWorker.WorkerSupportsCancellation = true;
-            backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
-            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
-        }
-
         private void LongOperationTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             LongOperationInProcess = true;
         }
 
         /// <summary>
-        /// This handler will be executed after process of all requests.
-        /// We need to stop timer and update states.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            longOperationTimer.Stop();
-            LongOperationInProcess = false;
-            Working = false;
-            RunWorkerCompleted?.Invoke(this, e);
-        }
-
-        /// <summary>
-        /// Main function of BackgroundWorker
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            try
-            {
-                //While queue is not empty we process request
-                while (queue.TryDequeue(out IHttpCall call))
-                {
-                    Working = true;
-                    WorkUntilSuccess((BackgroundWorker)sender, call);
-                }
-            }
-            finally
-            {
-                e.Cancel = true;
-                e.Result = true;
-            }
-        }
-
-        /// <summary>
         /// Try to process HttpCall until success or manual stop.
         /// </summary>
-        /// <param name="bwAsync">BackgroundWorker to check if cancellation requested</param>
         /// <param name="call">HttpCall to process</param>
-        private void WorkUntilSuccess(BackgroundWorker bwAsync, IHttpCall call)
+        private void WorkUntilSuccess(IHttpCall call)
         {
             long count = 0;
             int sleep = 0;
-            while (!bwAsync.CancellationPending)
+            while (true)
             {
                 //Counting attempts, updating statuses and try to process request.
                 count++;
@@ -259,10 +169,11 @@ namespace HttpWorker
                 if (success)
                 {
                     NetworkNotAvailable = false;
+                    Remove(call);
                     return;
                 }
+
             }
-            return;
         }
 
         /// <summary>
@@ -275,30 +186,20 @@ namespace HttpWorker
             try
             {
                 HttpResponseMessage response = null;
-                switch (call.HttpType)
+                response = call.HttpType switch
                 {
-                    case HttpCallTypeEnum.Get:
-                        response = Client.GetAsync(call.Uri).Result;
-                        break;
-                    case HttpCallTypeEnum.Post:
-                        response = Client.PostAsync(call.Uri, call.Content).Result;
-                        break;
-                    case HttpCallTypeEnum.Delete:
-                        response = Client.DeleteAsync(call.Uri).Result;
-                        break;
-                    case HttpCallTypeEnum.Put:
-                        response = Client.PutAsync(call.Uri, call.Content).Result;
-                        break;
-                    default:
-                        throw new NotSupportedException(string.Format("Not supported HttpCallTypeEnum: {0}"
-                            , HttpCallTypeEnum.Put.ToString()));
-                }
-
+                    HttpCallTypeEnum.Get => Client.GetAsync(call.Uri).ConfigureAwait(false).GetAwaiter().GetResult(),
+                    HttpCallTypeEnum.Post => Client.PostAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult(),
+                    HttpCallTypeEnum.Delete => Client.DeleteAsync(call.Uri).ConfigureAwait(false).GetAwaiter().GetResult(),
+                    HttpCallTypeEnum.Put => Client.PutAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult(),
+                    _ => throw new NotSupportedException(string.Format("Not supported HttpCallTypeEnum: {0}"
+                            , HttpCallTypeEnum.Put.ToString())),
+                };
                 string responseString = "";
 
                 if (response?.IsSuccessStatusCode == true)
                 {
-                    responseString = response.Content.ReadAsStringAsync().Result;
+                    responseString = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
 
                 call.SetResult(response.StatusCode, responseString);
@@ -307,6 +208,21 @@ namespace HttpWorker
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Remove processed call. If all calls are processed then update statuses.
+        /// </summary>
+        /// <param name="call">Processed call</param>
+        private void Remove(IHttpCall call)
+        {
+            concurrentDictionary.TryRemove(call, out bool value);
+            if (concurrentDictionary.IsEmpty)
+            {
+                longOperationTimer.Stop();
+                LongOperationInProcess = false;
+                Working = false;
             }
         }
     }

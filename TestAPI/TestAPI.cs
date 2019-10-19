@@ -38,7 +38,7 @@ namespace TestAPI
         {
             if(statusCode != HttpStatusCode.OK)
             {
-                throw new Exception("Invalid status code.");
+                throw new Exception(string.Format("Invalid status code {0}", statusCode.ToString()));
             }
             try
             {

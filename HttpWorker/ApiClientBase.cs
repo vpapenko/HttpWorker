@@ -65,11 +65,11 @@ namespace HttpWorker
         /// </summary>
         /// <typeparam name="T">Return type</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <T> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<T> AddGetCall<T>(Uri uri, Func<HttpStatusCode, string, T> responseConverter)
+        public async Task<TResult> AddGetCall<TResult>(Uri uri, Func<HttpStatusCode, string, TResult> responseConverter)
         {
-            HttpCall<T> call = new HttpCall<T>(responseConverter)
+            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Get,
                 Uri = uri
@@ -84,11 +84,11 @@ namespace HttpWorker
         /// <typeparam name="T">Return type</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
         /// <param name="content">The HTTP request content sent to the server</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <T> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<T> AddPostCall<T>(Uri uri, HttpContent content, Func<HttpStatusCode, string, T> responseConverter)
+        public async Task<TResult> AddPostCall<TResult>(Uri uri, HttpContent content, Func<HttpStatusCode, string, TResult> responseConverter)
         {
-            HttpCall<T> call = new HttpCall<T>(responseConverter)
+            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Post,
                 Uri = uri,
@@ -103,11 +103,11 @@ namespace HttpWorker
         /// </summary>
         /// <typeparam name="T">Return type</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <T> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<T> AddDeleteCall<T>(Uri uri, Func<HttpStatusCode, string, T> responseConverter)
+        public async Task<TResult> AddDeleteCall<TResult>(Uri uri, Func<HttpStatusCode, string, TResult> responseConverter)
         {
-            HttpCall<T> call = new HttpCall<T>(responseConverter)
+            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Delete,
                 Uri = uri
@@ -122,11 +122,11 @@ namespace HttpWorker
         /// <typeparam name="T">Return type</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
         /// <param name="content">The HTTP request content sent to the server</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <T> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<T> AddPutCall<T>(Uri uri, HttpContent content, Func<HttpStatusCode, string, T> responseConverter)
+        public async Task<TResult> AddPutCall<TResult>(Uri uri, HttpContent content, Func<HttpStatusCode, string, TResult> responseConverter)
         {
-            HttpCall<T> call = new HttpCall<T>(responseConverter)
+            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Put,
                 Uri = uri,
@@ -141,15 +141,6 @@ namespace HttpWorker
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         
-        /// <summary>
-        /// Add request to queue.
-        /// </summary>
-        /// <param name="call"></param>
-        private void AddCall(IHttpCall call)
-        {
-            httpWorker.Add(call);
-        }
-
         private void HttpWorker_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(HttpWorker.NetworkNotAvailable))
