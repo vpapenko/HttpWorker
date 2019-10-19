@@ -20,7 +20,6 @@ namespace HttpWorker
 
         bool networkNotAvailable;
         bool longOperationInProcess;
-        bool longRun;
         bool working;
         double longOperationStartTime = 2000;
 

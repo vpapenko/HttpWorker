@@ -33,7 +33,7 @@ namespace TestConsoleApp
                         //Run all requests and don't wait for results.
                         for (var i = 1; i <= count; i++)
                         {
-                            Run(i);
+                            Run(i).RunAndForget();
                         }
                         Console.WriteLine("All requests are send.");
                     }
@@ -78,6 +78,14 @@ namespace TestConsoleApp
                         break;
                 }
             }
+        }
+    }
+
+    public static class TaskExtensions
+    {
+        public static async void RunAndForget(this Task task)
+        {
+            await task;
         }
     }
 }

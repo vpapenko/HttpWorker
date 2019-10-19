@@ -12,17 +12,17 @@ namespace HttpWorker
     /// It store all data to run request and contains Task to return result.
     /// </summary>
     /// <typeparam name="T">return type</typeparam>
-    internal class HttpCall<T>
+    internal class HttpCall<TResult>
         : IHttpCall
     {
-        readonly Func<HttpStatusCode, string, T> responseConverter;
-        TaskCompletionSource<T> TaskCompletionSource = new TaskCompletionSource<T>();
+        readonly Func<HttpStatusCode, string, TResult> responseConverter;
+        TaskCompletionSource<TResult> TaskCompletionSource = new TaskCompletionSource<TResult>();
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="responseConverter">Function to convert HTTP response to type T</param>
-        public HttpCall(Func<HttpStatusCode, string, T> responseConverter)
+        public HttpCall(Func<HttpStatusCode, string, TResult> responseConverter)
         {
             this.responseConverter = responseConverter ?? throw new ArgumentNullException(nameof(responseConverter));
         }
@@ -31,7 +31,7 @@ namespace HttpWorker
         public Uri Uri { get; set; }
         public HttpContent Content { get; set; }
         
-        public Task<T> Task { get { return TaskCompletionSource.Task; } }
+        public Task<TResult> Task { get { return TaskCompletionSource.Task; } }
 
         /// <summary>
         /// Function to set result of this call.
@@ -42,7 +42,7 @@ namespace HttpWorker
         {
             try
             {
-                T result = responseConverter(statusCode, response);
+                TResult result = responseConverter(statusCode, response);
                 TaskCompletionSource.SetResult(result);
             }
             catch (Exception ex)
