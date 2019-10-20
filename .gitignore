@@ -7,3 +7,5 @@
 /TestConsoleApp/obj
 bin
 obj
+*.user
+packages
