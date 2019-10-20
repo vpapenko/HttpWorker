@@ -205,7 +205,7 @@ namespace HttpWorker
                 call.SetResult(response.StatusCode, responseString);
                 return true;
             }
-            catch (Exception)
+            catch(HttpRequestException)
             {
                 return false;
             }
