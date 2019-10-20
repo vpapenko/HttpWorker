@@ -127,9 +127,8 @@ namespace HttpWorker
         {
             concurrentDictionary.TryAdd(call, true);
             longOperationTimer.Start();
-            Action<IHttpCall> processcallUntilSuccess = WorkUntilSuccess;
             Working = true;
-            ThreadPool.QueueUserWorkItem(processcallUntilSuccess, call, true);
+            ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
         }
 
 
@@ -147,8 +146,9 @@ namespace HttpWorker
         /// Try to process HttpCall until success or manual stop.
         /// </summary>
         /// <param name="call">HttpCall to process</param>
-        private void WorkUntilSuccess(IHttpCall call)
+        private void WorkUntilSuccess(object callObject)
         {
+            IHttpCall call = (IHttpCall)callObject;
             long count = 0;
             int sleep = 0;
             while (true)
@@ -186,15 +186,24 @@ namespace HttpWorker
             try
             {
                 HttpResponseMessage response = null;
-                response = call.HttpType switch
+                switch (call.HttpType)
                 {
-                    HttpCallTypeEnum.Get => Client.GetAsync(call.Uri).ConfigureAwait(false).GetAwaiter().GetResult(),
-                    HttpCallTypeEnum.Post => Client.PostAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult(),
-                    HttpCallTypeEnum.Delete => Client.DeleteAsync(call.Uri).ConfigureAwait(false).GetAwaiter().GetResult(),
-                    HttpCallTypeEnum.Put => Client.PutAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult(),
-                    _ => throw new NotSupportedException(string.Format("Not supported HttpCallTypeEnum: {0}"
-                            , HttpCallTypeEnum.Put.ToString())),
-                };
+                    case HttpCallTypeEnum.Get:
+                        response = Client.GetAsync(call.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
+                        break;
+                    case HttpCallTypeEnum.Post:
+                        response = Client.PostAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult();
+                        break;
+                    case HttpCallTypeEnum.Delete:
+                        response = Client.DeleteAsync(call.Uri).ConfigureAwait(false).GetAwaiter().GetResult();
+                        break;
+                    case HttpCallTypeEnum.Put:
+                        response = Client.PutAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult();
+                        break;
+                    default:
+                        throw new NotSupportedException(string.Format("Not supported HttpCallTypeEnum: {0}"
+                            , HttpCallTypeEnum.Put.ToString()));
+                }
                 string responseString = "";
 
                 if (response?.IsSuccessStatusCode == true)
