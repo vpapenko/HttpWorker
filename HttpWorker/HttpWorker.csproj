@@ -7,7 +7,7 @@
     <Authors>Victor Papenko</Authors>
     <Company>Victor Papenko</Company>
     <Description>Library to create HTTP API clients.
-HttpWorker provides processing of requests in background queue and managing of network failures. It has statuses like LongOperationInProcess, Working, NetworkNotAvailable.</Description>
+HttpWorker provides processing of requests in background and managing of network failures. It has statuses like LongOperationInProcess, Working, NetworkNotAvailable.</Description>
     <RepositoryUrl>https://github.com/vpapenko/HttpWorker</RepositoryUrl>
     <PackageTags>http-client queue background-worker dotnet netstandard csharp c-sharp</PackageTags>
   </PropertyGroup>
