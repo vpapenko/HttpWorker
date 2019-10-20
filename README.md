@@ -17,4 +17,4 @@ This library is published as nuget package.
 to add http call to queue.
 * Inheritance
 
-  Inherit ApiClientBase to create cpecific API client like in [TestAPI.cs](TestAPI/TestAPI.cs)
+  Inherit ApiClientBase to create cpecific API client like in [JSONPlaceholderTestAPI.cs](TestAPI/JSONPlaceholderTestAPI.cs)
