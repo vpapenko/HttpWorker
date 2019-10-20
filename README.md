@@ -10,10 +10,10 @@ This library is published as nuget package.
 * Derectly by using of `ApiClientBase`.
 
   Use
-`async Task<T> AddGetCall<T>`
-`async Task<T> AddPostCall<T>`
-`async Task<T> AddDeleteCall<T>`
-`async Task<T> AddPutCall<T>`
+`async AddGetCall`
+`async AddPostCall`
+`async AddDeleteCall`
+`async AddPutCall`
 to add http call to queue.
 * Inheritance
 
