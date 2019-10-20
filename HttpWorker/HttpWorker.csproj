@@ -10,6 +10,14 @@
 HttpWorker provides processing of requests in background queue and managing of network failures. It has statuses like LongOperationInProcess, Working, NetworkNotAvailable.</Description>
     <RepositoryUrl>https://github.com/vpapenko/HttpWorker</RepositoryUrl>
     <PackageTags>http-client queue background-worker dotnet netstandard csharp c-sharp</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
