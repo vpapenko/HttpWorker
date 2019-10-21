@@ -29,14 +29,15 @@
         private void InitializeComponent()
         {
             this.RunButton = new System.Windows.Forms.Button();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.requestsCount = new System.Windows.Forms.NumericUpDown();
             this.networkNotAvailable = new System.Windows.Forms.Label();
             this.working = new System.Windows.Forms.Label();
             this.longOperationInProcess = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            this.parallelCheckBox = new System.Windows.Forms.CheckBox();
+            ((System.ComponentModel.ISupportInitialize)(this.requestsCount)).BeginInit();
             this.SuspendLayout();
             // 
             // RunButton
@@ -50,14 +51,14 @@
             this.RunButton.UseVisualStyleBackColor = true;
             this.RunButton.Click += new System.EventHandler(this.button1_Click);
             // 
-            // numericUpDown1
+            // requestsCount
             // 
-            this.numericUpDown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.numericUpDown1.Location = new System.Drawing.Point(587, 15);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown1.TabIndex = 1;
-            this.numericUpDown1.Value = new decimal(new int[] {
+            this.requestsCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.requestsCount.Location = new System.Drawing.Point(521, 15);
+            this.requestsCount.Name = "requestsCount";
+            this.requestsCount.Size = new System.Drawing.Size(120, 20);
+            this.requestsCount.TabIndex = 1;
+            this.requestsCount.Value = new decimal(new int[] {
             3,
             0,
             0,
@@ -115,29 +116,42 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(546, 17);
+            this.label1.Location = new System.Drawing.Point(480, 17);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 6;
             this.label1.Text = "Count";
+            // 
+            // parallelCheckBox
+            // 
+            this.parallelCheckBox.AutoSize = true;
+            this.parallelCheckBox.Checked = true;
+            this.parallelCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.parallelCheckBox.Location = new System.Drawing.Point(647, 16);
+            this.parallelCheckBox.Name = "parallelCheckBox";
+            this.parallelCheckBox.Size = new System.Drawing.Size(60, 17);
+            this.parallelCheckBox.TabIndex = 7;
+            this.parallelCheckBox.Text = "Parallel";
+            this.parallelCheckBox.UseVisualStyleBackColor = true;
             // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.parallelCheckBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.listBox2);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.longOperationInProcess);
             this.Controls.Add(this.working);
             this.Controls.Add(this.networkNotAvailable);
-            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.requestsCount);
             this.Controls.Add(this.RunButton);
             this.Name = "TestForm";
             this.Text = "TestForm";
             this.Load += new System.EventHandler(this.Form1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.requestsCount)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -146,13 +160,14 @@
         #endregion
 
         private System.Windows.Forms.Button RunButton;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown requestsCount;
         private System.Windows.Forms.Label networkNotAvailable;
         private System.Windows.Forms.Label working;
         private System.Windows.Forms.Label longOperationInProcess;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox parallelCheckBox;
     }
 }
 

@@ -22,30 +22,39 @@ namespace TestWindowsFormsApp
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Run((int)numericUpDown1.Value).RunAndForget();
+            Run((int)requestsCount.Value, parallelCheckBox.Checked).RunAndForget();
         }
 
-        public async Task Run(int count)
+        public async Task Run(int count, bool parallel)
         {
-            Guid runId = Guid.NewGuid();
-            for (var id = 1; id <= numericUpDown1.Value; id++)
+            var runId = Guid.NewGuid();
+            for (var id = 1; id <= requestsCount.Value; id++)
             {
-                listBox1.Items.Add(string.Format("{0}. Request for id {1}", runId.ToString(), id.ToString()));
-                listBox1.SelectedIndex = listBox1.Items.Count - 1;
-                try
+                if(parallel)
                 {
-                    var r = await api.TestMethod1(id);
-                    listBox2.Items.Add(string.Format("{0}. Request for id {1} is completed.", runId.ToString(), r["id"].ToString()));
-                    listBox2.SelectedIndex = listBox2.Items.Count - 1;
+                    Run(runId, id).RunAndForget();
                 }
-                catch (Exception ex)
+                else
                 {
-                    listBox2.Items.Add(string.Format("{0}. Exception while call for id {1}. {2}", runId.ToString(), id.ToString(), ex.ToString()));
-                    listBox2.SelectedIndex = listBox2.Items.Count - 1;
+                    await Run(runId, id);
                 }
             }
-            listBox1.Items.Add(string.Format("{0}. All requests are send.", runId.ToString()));
-            listBox1.SelectedIndex = listBox1.Items.Count - 1;
+
+            AddToListBox(listBox1, string.Format("{0}. All requests are send.", runId.ToString()));
+        }
+
+        public async Task Run(Guid runId, int id)
+        {
+            AddToListBox(listBox1, string.Format("{0}. Request for id {1}", runId.ToString(), id.ToString()));
+            try
+            {
+                var r = await api.TestMethod1(id);
+                AddToListBox(listBox2, string.Format("{0}. Request for id {1} is completed.", runId.ToString(), r["id"].ToString()));
+            }
+            catch (Exception ex)
+            {
+                AddToListBox(listBox2, string.Format("{0}. Exception while call for id {1}. {2}", runId.ToString(), id.ToString(), ex.ToString()));
+            }
         }
 
         private void Api_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -63,6 +72,12 @@ namespace TestWindowsFormsApp
                     working.BackColor = api.Working ? Color.Green : Control.DefaultBackColor;
                     break;
             }
+        }
+
+        private void AddToListBox(ListBox listBox, string text)
+        {
+            listBox.Items.Add(text);
+            listBox.SelectedIndex = listBox.Items.Count - 1;
         }
     }
 
