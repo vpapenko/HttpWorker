@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
@@ -10,7 +10,7 @@ namespace HttpWorker
     internal class HttpWorker : INotifyPropertyChanged
     {
         ///Dictionary for unprocessed HttpCall
-        readonly ConcurrentDictionary<IHttpCall, bool> concurrentDictionary = new ConcurrentDictionary<IHttpCall, bool>();
+        readonly Dictionary<IHttpCall, bool> httpCallDictionary = new Dictionary<IHttpCall, bool>();
 
         ///Timer to switch LongOperation property.
         readonly System.Timers.Timer longOperationTimer;
@@ -125,10 +125,13 @@ namespace HttpWorker
         /// <param name="call"></param>
         public void Add(IHttpCall call)
         {
-            concurrentDictionary.TryAdd(call, true);
-            longOperationTimer.Start();
-            Working = true;
-            ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
+            lock (httpCallDictionary)
+            {
+                httpCallDictionary.Add(call, true);
+                longOperationTimer.Start();
+                Working = true;
+                ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
+            }
         }
 
 
@@ -226,12 +229,15 @@ namespace HttpWorker
         /// <param name="call">Processed call</param>
         private void Remove(IHttpCall call)
         {
-            concurrentDictionary.TryRemove(call, out bool value);
-            if (concurrentDictionary.IsEmpty)
+            lock (httpCallDictionary)
             {
-                longOperationTimer.Stop();
-                LongOperationInProcess = false;
-                Working = false;
+                httpCallDictionary.Remove(call);
+                if (httpCallDictionary.Count == 0)
+                {
+                    longOperationTimer.Stop();
+                    LongOperationInProcess = false;
+                    Working = false;
+                }
             }
         }
     }
