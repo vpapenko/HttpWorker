@@ -1,24 +1,25 @@
 ﻿using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace HttpWorker
 {
     internal class HttpWorker : INotifyPropertyChanged
     {
         ///Dictionary for unprocessed HttpCall
-        readonly ConcurrentDictionary<IHttpCall, bool> concurrentDictionary = new ConcurrentDictionary<IHttpCall, bool>();
+        readonly HashSet<IHttpCall> httpCallHashSet = new HashSet<IHttpCall>();
 
         ///Timer to switch LongOperation property.
         readonly System.Timers.Timer longOperationTimer;
 
+        int countOfUnprocessedHttpCalls;
         bool networkNotAvailable;
         bool longOperationInProcess;
         bool working;
-
 
         public HttpWorker()
         {
@@ -32,6 +33,25 @@ namespace HttpWorker
 
         ///HTTP client. Can be addition setup in API implementation
         public HttpClient Client { get; private set; } = new HttpClient();
+
+        /// <summary>
+        /// Count of unprocessed HTTP calls.
+        /// </summary>
+        public int CountOfUnprocessedHttpCalls
+        {
+            get
+            {
+                return countOfUnprocessedHttpCalls;
+            }
+            private set
+            {
+                if (countOfUnprocessedHttpCalls != value)
+                {
+                    countOfUnprocessedHttpCalls = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// Indicate that long time operation is in process
@@ -49,19 +69,6 @@ namespace HttpWorker
         }
 
         /// <summary>
-        /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
-        /// Also after this count of attempt we set NetworkNotAvailable statuses.
-        /// </summary>
-        public int RetrySleepTimer1 { get; set; } = 2;
-        public int RetrySleepTime1 { get; set; } = 2000;
-
-        /// <summary>
-        /// If count of unsuccessful attempts are higher we slow down more.
-        /// </summary>
-        public int RetrySleepTimer2 { get; set; } = 50;
-        public int RetrySleepTime2 { get; set; } = 15000;
-
-        /// <summary>
         /// Indicate that network is not available
         /// </summary>
         public bool NetworkNotAvailable
@@ -72,7 +79,7 @@ namespace HttpWorker
             }
             private set
             {
-                if (value != networkNotAvailable)
+                if (networkNotAvailable != value)
                 {
                     networkNotAvailable = value;
                     OnPropertyChanged();
@@ -91,7 +98,7 @@ namespace HttpWorker
             }
             private set
             {
-                if (value != longOperationInProcess)
+                if (longOperationInProcess != value)
                 {
                     longOperationInProcess = value;
                     OnPropertyChanged();
@@ -110,7 +117,7 @@ namespace HttpWorker
             }
             private set
             {
-                if (value != working)
+                if (working != value)
                 {
                     working = value;
                     OnPropertyChanged();
@@ -119,27 +126,33 @@ namespace HttpWorker
         }
 
         /// <summary>
-        /// Add new request.
-        /// Worker will start automatically
+        /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
+        /// Also after this count of attempt we set NetworkNotAvailable statuses.
+        /// </summary>
+        public int RetrySleepTimer1 { get; set; } = 2;
+        public int RetrySleepTime1 { get; set; } = 2000;
+
+        /// <summary>
+        /// If count of unsuccessful attempts are higher we slow down more.
+        /// </summary>
+        public int RetrySleepTimer2 { get; set; } = 50;
+        public int RetrySleepTime2 { get; set; } = 15000;
+
+
+        /// <summary>
+        /// Add new request and return request result.
         /// </summary>
         /// <param name="call"></param>
-        public void Add(IHttpCall call)
+        public async Task<TResult> AddCall<TResult>(IHttpCall<TResult> call)
         {
-            concurrentDictionary.TryAdd(call, true);
-            longOperationTimer.Start();
-            Working = true;
-            ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
+            TResult result = await AddAndCall(call);
+            Remove(call);
+            return result;
         }
-
 
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void LongOperationTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            LongOperationInProcess = true;
         }
 
         /// <summary>
@@ -169,7 +182,6 @@ namespace HttpWorker
                 if (success)
                 {
                     NetworkNotAvailable = false;
-                    Remove(call);
                     return;
                 }
 
@@ -220,19 +232,50 @@ namespace HttpWorker
             }
         }
 
+        private async Task<TResult> AddAndCall<TResult>(IHttpCall<TResult> call)
+        {
+            Task<TResult> task = call.Task;
+            Add(call);
+            TResult result = await task;
+            return result;
+        }
+
+        private void Add(IHttpCall call)
+        {
+            TaskScheduler taskScheduler1 = TaskScheduler.FromCurrentSynchronizationContext();
+            lock (httpCallHashSet)
+            {
+                httpCallHashSet.Add(call);
+                CountOfUnprocessedHttpCalls = httpCallHashSet.Count;
+                longOperationTimer.Start();
+                Working = true;
+                ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
+            }
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+        }
+
         /// <summary>
         /// Remove processed call. If all calls are processed then update statuses.
         /// </summary>
         /// <param name="call">Processed call</param>
-        private void Remove(IHttpCall call)
+        internal void Remove(IHttpCall call)
         {
-            concurrentDictionary.TryRemove(call, out bool value);
-            if (concurrentDictionary.IsEmpty)
+            lock (httpCallHashSet)
             {
-                longOperationTimer.Stop();
-                LongOperationInProcess = false;
-                Working = false;
+                httpCallHashSet.Remove(call);
+                if (httpCallHashSet.Count == 0)
+                {
+                    longOperationTimer.Stop();
+                    LongOperationInProcess = false;
+                    Working = false;
+                }
+                CountOfUnprocessedHttpCalls = httpCallHashSet.Count;
             }
+        }
+
+        private void LongOperationTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            LongOperationInProcess = true;
         }
     }
 }

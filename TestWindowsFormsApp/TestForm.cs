@@ -40,20 +40,20 @@ namespace TestWindowsFormsApp
                 }
             }
 
-            AddToListBox(listBox1, string.Format("{0}. All requests are send.", runId.ToString()));
+            AddToListBox(requestListBox, string.Format("{0}. All requests are send.", runId.ToString()));
         }
 
         public async Task Run(Guid runId, int id)
         {
-            AddToListBox(listBox1, string.Format("{0}. Request for id {1}", runId.ToString(), id.ToString()));
+            AddToListBox(requestListBox, string.Format("{0}. Request for id {1}", runId.ToString(), id.ToString()));
             try
             {
                 var r = await api.TestMethod1(id);
-                AddToListBox(listBox2, string.Format("{0}. Request for id {1} is completed.", runId.ToString(), r["id"].ToString()));
+                AddToListBox(responseListBox, string.Format("{0}. Request for id {1} is completed.", runId.ToString(), r["id"].ToString()));
             }
             catch (Exception ex)
             {
-                AddToListBox(listBox2, string.Format("{0}. Exception while call for id {1}. {2}", runId.ToString(), id.ToString(), ex.ToString()));
+                AddToListBox(responseListBox, string.Format("{0}. Exception while call for id {1}. {2}", runId.ToString(), id.ToString(), ex.ToString()));
             }
         }
 
@@ -63,13 +63,16 @@ namespace TestWindowsFormsApp
             switch (e.PropertyName)
             {
                 case (nameof(api.LongOperationInProcess)):
-                    longOperationInProcess.BackColor = api.LongOperationInProcess ? Color.Yellow : Control.DefaultBackColor;
+                    longOperationInProcessLabel.BackColor = api.LongOperationInProcess ? Color.Yellow : Control.DefaultBackColor;
                     break;
                 case (nameof(api.NetworkNotAvailable)):
-                    networkNotAvailable.BackColor = api.NetworkNotAvailable ? Color.Red : Control.DefaultBackColor;
+                    networkNotAvailableLabel.BackColor = api.NetworkNotAvailable ? Color.Red : Control.DefaultBackColor;
                     break;
                 case (nameof(api.Working)):
-                    working.BackColor = api.Working ? Color.Green : Control.DefaultBackColor;
+                    workingLabel.BackColor = api.Working ? Color.Green : Control.DefaultBackColor;
+                    break;
+                case (nameof(api.CountOfUnprocessedHttpCalls)):
+                    unprocessedLabel.Text = string.Format("Unprocessed {0}", api.CountOfUnprocessedHttpCalls);
                     break;
             }
         }

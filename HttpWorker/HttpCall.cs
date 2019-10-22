@@ -13,7 +13,7 @@ namespace HttpWorker
     /// </summary>
     /// <typeparam name="T">return type</typeparam>
     internal class HttpCall<TResult>
-        : IHttpCall
+        : IHttpCall<TResult>
     {
         readonly Func<HttpStatusCode, string, TResult> responseConverter;
         TaskCompletionSource<TResult> TaskCompletionSource = new TaskCompletionSource<TResult>();

@@ -36,19 +36,19 @@ namespace HttpWorker
             }
         }
 
+        public int CountOfUnprocessedHttpCalls
+        {
+            get
+            {
+                return httpWorker.CountOfUnprocessedHttpCalls;
+            }
+        }
+
         public bool NetworkNotAvailable
         {
             get
             {
                 return httpWorker.NetworkNotAvailable;
-            }
-        }
-
-        public bool Working
-        {
-            get
-            {
-                return httpWorker.Working;
             }
         }
 
@@ -60,6 +60,14 @@ namespace HttpWorker
             }
         }
 
+        public bool Working
+        {
+            get
+            {
+                return httpWorker.Working;
+            }
+        }
+        
         /// <summary>
         /// Add HTTP get to queue
         /// </summary>
@@ -74,8 +82,7 @@ namespace HttpWorker
                 HttpType = HttpCallTypeEnum.Get,
                 Uri = uri
             };
-            httpWorker.Add(call);
-            return await call.Task;
+            return await httpWorker.AddCall<TResult>(call);
         }
 
         /// <summary>
@@ -94,8 +101,7 @@ namespace HttpWorker
                 Uri = uri,
                 Content = content
             };
-            httpWorker.Add(call);
-            return await call.Task;
+            return await httpWorker.AddCall<TResult>(call);
         }
 
         /// <summary>
@@ -112,8 +118,7 @@ namespace HttpWorker
                 HttpType = HttpCallTypeEnum.Delete,
                 Uri = uri
             };
-            httpWorker.Add(call);
-            return await call.Task;
+            return await httpWorker.AddCall<TResult>(call);
         }
 
         /// <summary>
@@ -132,8 +137,7 @@ namespace HttpWorker
                 Uri = uri,
                 Content = content
             };
-            httpWorker.Add(call);
-            return await call.Task;
+            return await httpWorker.AddCall<TResult>(call);
         }
 
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
@@ -154,6 +158,10 @@ namespace HttpWorker
             else if (e.PropertyName == nameof(HttpWorker.Working))
             {
                 OnPropertyChanged(nameof(Working));
+            }
+            else if (e.PropertyName == nameof(HttpWorker.CountOfUnprocessedHttpCalls))
+            {
+                OnPropertyChanged(nameof(CountOfUnprocessedHttpCalls));
             }
         }
     }
