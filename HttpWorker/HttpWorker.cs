@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HttpWorker
 {
-    internal class HttpWorker : INotifyPropertyChanged
+    public class Worker : INotifyPropertyChanged
     {
         ///Dictionary for unprocessed HttpCall
         readonly HashSet<IHttpCall> httpCallHashSet = new HashSet<IHttpCall>();
@@ -21,12 +21,18 @@ namespace HttpWorker
         bool longOperationInProcess;
         bool working;
 
-        public HttpWorker()
+        public Worker()
         {
-            longOperationTimer = new System.Timers.Timer(2000);
+            longOperationTimer = new System.Timers.Timer(20);
             longOperationTimer.Elapsed += LongOperationTimer_Elapsed;
             longOperationTimer.AutoReset = false;
             longOperationTimer.Enabled = false;
+        }
+
+        public Worker(HttpClient client)
+            : this()
+        {
+            Client = client;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -143,6 +149,16 @@ namespace HttpWorker
         /// Add new request and return request result.
         /// </summary>
         /// <param name="call"></param>
+        public async Task AddCall(IHttpCall call)
+        {
+            await AddAndCall(call);
+            Remove(call);
+        }
+
+        /// <summary>
+        /// Add new request and return request result.
+        /// </summary>
+        /// <param name="call"></param>
         public async Task<TResult> AddCall<TResult>(IHttpCall<TResult> call)
         {
             TResult result = await AddAndCall(call);
@@ -220,7 +236,7 @@ namespace HttpWorker
 
                 if (response?.IsSuccessStatusCode == true)
                 {
-                    responseString = response.Content.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                    responseString = response.Content?.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
 
                 call.SetResult(response.StatusCode, responseString);
@@ -240,14 +256,23 @@ namespace HttpWorker
             return result;
         }
 
+        private async Task AddAndCall(IHttpCall call)
+        {
+            Task task = call.Task;
+            Add(call);
+            await task;
+        }
+
         private void Add(IHttpCall call)
         {
-            TaskScheduler taskScheduler1 = TaskScheduler.FromCurrentSynchronizationContext();
             lock (httpCallHashSet)
             {
                 httpCallHashSet.Add(call);
                 CountOfUnprocessedHttpCalls = httpCallHashSet.Count;
-                longOperationTimer.Start();
+                if (!longOperationTimer.Enabled)
+                {
+                    longOperationTimer.Start();
+                }
                 Working = true;
                 ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
             }

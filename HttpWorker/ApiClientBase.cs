@@ -15,7 +15,7 @@ namespace HttpWorker
     /// </summary>
     public class ApiClientBase : INotifyPropertyChanged
     {
-        readonly HttpWorker httpWorker = new HttpWorker();
+        readonly Worker httpWorker = new Worker();
 
         public ApiClientBase()
         {
@@ -147,19 +147,19 @@ namespace HttpWorker
         
         private void HttpWorker_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(HttpWorker.NetworkNotAvailable))
+            if (e.PropertyName == nameof(Worker.NetworkNotAvailable))
             {
                 OnPropertyChanged(nameof(NetworkNotAvailable));
             }
-            else if (e.PropertyName == nameof(HttpWorker.LongOperationInProcess))
+            else if (e.PropertyName == nameof(Worker.LongOperationInProcess))
             {
                 OnPropertyChanged(nameof(LongOperationInProcess));
             }
-            else if (e.PropertyName == nameof(HttpWorker.Working))
+            else if (e.PropertyName == nameof(Worker.Working))
             {
                 OnPropertyChanged(nameof(Working));
             }
-            else if (e.PropertyName == nameof(HttpWorker.CountOfUnprocessedHttpCalls))
+            else if (e.PropertyName == nameof(Worker.CountOfUnprocessedHttpCalls))
             {
                 OnPropertyChanged(nameof(CountOfUnprocessedHttpCalls));
             }
