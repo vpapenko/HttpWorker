@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 
 namespace HttpWorker
 {
-    internal interface IHttpCall<TResult>
+    public interface IHttpCall<TResult>
         : IHttpCall
     {
-        Task<TResult> Task { get; }
+        new Task<TResult> Task { get; }
     }
 
-    internal interface IHttpCall
+    public interface IHttpCall
     {
+        Task Task { get; }
         void SetResult(HttpStatusCode statusCode, string responseString);
         HttpCallTypeEnum HttpType { get; set; }
         Uri Uri { get; set; }
