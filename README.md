@@ -2,7 +2,7 @@
 Library to create HTTP API clients.
 
 HttpWorker provides processing of requests in background and managing of network failures.
-It has statuses like LongOperationInProcess, Working, NetworkNotAvailable.
+It has statuses like `CountOfUnprocessedHttpCalls`, `NetworkNotAvailable`, `LongOperationInProcess`, `Working`.
 
 This library is published as nuget package.
 
