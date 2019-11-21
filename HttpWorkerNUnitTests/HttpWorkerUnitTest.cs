@@ -83,14 +83,14 @@ namespace Tests
 
             Assert.AreEqual(false, worker.Working);
             Assert.AreEqual(false, worker.LongOperationInProcess);
-            Run(10, worker, 200).RunAndForget();
-            Run(20, worker, 200).RunAndForget();
+            Run(10, worker, 1000).RunAndForget();
+            Run(20, worker, 1000).RunAndForget();
             Assert.AreEqual(true, worker.Working);
             Assert.AreEqual(false, worker.LongOperationInProcess);
-            Thread.Sleep(390);
+            Thread.Sleep(900);
             Assert.AreEqual(true, worker.LongOperationInProcess);
             Assert.AreEqual(true, worker.Working);
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             Assert.AreEqual(false, worker.LongOperationInProcess);
             Assert.AreEqual(false, worker.Working);
         }
