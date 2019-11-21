@@ -48,7 +48,7 @@ namespace Tests
             Run(10, worker).RunAndForget();
             Run(20, worker).RunAndForget();
             Assert.AreEqual(true, worker.Working);
-            Thread.Sleep(300);
+            Thread.Sleep(1000);
             Assert.AreEqual(false, worker.Working);
         }
 
@@ -116,11 +116,11 @@ namespace Tests
             Run(worker, 100).RunAndForget();
             Assert.AreEqual(true, worker.Working);
             Assert.AreEqual(false, worker.NetworkNotAvailable);
-            Thread.Sleep(200);
+            Thread.Sleep(1000);
             Assert.AreEqual(true, worker.NetworkNotAvailable);
             Assert.AreEqual(true, worker.Working);
             _networkNotAvailable = false;
-            Thread.Sleep(200);
+            Thread.Sleep(1000);
             Assert.AreEqual(false, worker.NetworkNotAvailable);
             Assert.AreEqual(false, worker.Working);
         }
