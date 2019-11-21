@@ -65,7 +65,7 @@ namespace Tests
             Run(10, worker).RunAndForget();
             Run(20, worker).RunAndForget();
             Assert.AreEqual(2, worker.CountOfUnprocessedHttpCalls);
-            Thread.Sleep(600);
+            Thread.Sleep(3000);
             Assert.AreEqual(0, worker.CountOfUnprocessedHttpCalls);
         }
 
