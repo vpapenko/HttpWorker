@@ -65,7 +65,7 @@ namespace Tests
             Run(10, worker).RunAndForget();
             Run(20, worker).RunAndForget();
             Assert.AreEqual(2, worker.CountOfUnprocessedHttpCalls);
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
             Assert.AreEqual(0, worker.CountOfUnprocessedHttpCalls);
         }
 
@@ -87,10 +87,10 @@ namespace Tests
             Run(20, worker, 200).RunAndForget();
             Assert.AreEqual(true, worker.Working);
             Assert.AreEqual(false, worker.LongOperationInProcess);
-            Thread.Sleep(100);
+            Thread.Sleep(390);
             Assert.AreEqual(true, worker.LongOperationInProcess);
             Assert.AreEqual(true, worker.Working);
-            Thread.Sleep(400);
+            Thread.Sleep(1000);
             Assert.AreEqual(false, worker.LongOperationInProcess);
             Assert.AreEqual(false, worker.Working);
         }
