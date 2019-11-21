@@ -116,7 +116,6 @@ namespace Tests
             Run(worker, 100).RunAndForget();
             Thread.Sleep(100);
             Assert.AreEqual(true, worker.Working);
-            Assert.AreEqual(false, worker.NetworkNotAvailable);
             Thread.Sleep(1000);
             Assert.AreEqual(true, worker.NetworkNotAvailable);
             Assert.AreEqual(true, worker.Working);
