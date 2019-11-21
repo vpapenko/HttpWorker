@@ -1,5 +1,7 @@
 [![NuGet](http://img.shields.io/nuget/v/HttpWorker.svg)](https://www.nuget.org/packages/HttpWorker/)
 
+![](https://github.com/vpapenko/HttpWorker/workflows/Tests/badge.svg)
+
 # HttpWorker
 Library to create HTTP API clients.
 
