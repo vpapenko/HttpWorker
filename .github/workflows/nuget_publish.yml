@@ -22,7 +22,7 @@ jobs:
       run: dotnet build --configuration ReleaseNuget
   
     - name: Dotnet pack
-      run: dotnet pack -c ReleaseNuget -o out -p:PackageVersion=${{ github.event.release.tag_name }}
+      run: dotnet pack -c ReleaseNuget -o .\ -p:PackageVersion=${{ github.event.release.tag_name }}
     
     - name: Setup Nuget.exe
       uses: warrenbuckley/Setup-Nuget@v1
