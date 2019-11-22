@@ -7,24 +7,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        dotnet: [ '2.2.108', '3.0.0' ]
-    name: Dotnet ${{ matrix.dotnet }} sample
-
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET Core  ${{ github.event.release.tag_name }}
+    
+    - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
-    - name: Build with dotnet
+    
+    - name: Build with dotnet ${{ github.event.release.tag_name }}
       run: dotnet build --configuration Release
-    - name: Unit Tests
-      run: dotnet test
+    
     - name: Update AssemblyInfo files
-      uses: docker://gittools/gitversion:
+      uses: docker://gittools/gitversion:5.0.2-linux
       with:
-        args: '-updateassemblyinfo -nocache -output buildserver' 
+        args: '-updateassemblyinfo -nocache -output buildserver'
+    
+    - name: Pack with dotnet
+      run: dotnet pack -c Release -o out  
+    - name: Pack with dotnet
+      run: dotnet nuget push "HttpWorker" -k ${{ secrets.HttpWorker_GitHub_Actions }}
       
