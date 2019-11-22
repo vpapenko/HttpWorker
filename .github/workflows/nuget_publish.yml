@@ -1,4 +1,4 @@
-name: Publish to NuGet
+name: Publish to NuGet v${{ github.event.release.tag_name }}
 
 on: 
   release:
@@ -15,12 +15,12 @@ jobs:
       with:
         dotnet-version: 2.2.108
     
-    - name: Build with dotnet ${{ github.event.release.tag_name }}
+    - name: Build with dotnet
       run: dotnet build --configuration Release
   
     - name: Dotnet pack
       run: dotnet pack -c Release -o out -p:PackageVersion=${{ github.event.release.tag_name }}
     
     - name: Dotnet nuget push
-      run: dotnet nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg' -k ${{ secrets.HttpWorker_GitHub_Actions }}
+      run: dotnet nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg -k ${{ secrets.HttpWorker_GitHub_Actions }}
       
