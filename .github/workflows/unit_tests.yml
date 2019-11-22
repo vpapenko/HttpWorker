@@ -24,4 +24,4 @@ jobs:
     - name: Update AssemblyInfo files
       uses: docker://gittools/gitversion:5.0.2-linux
       with:
-        args: 'next-version: 0.6.1 -updateassemblyinfo -nocache -output buildserver'
+        args: '-updateassemblyinfo -nocache -output buildserver'
