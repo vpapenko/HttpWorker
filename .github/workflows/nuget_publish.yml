@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
     
@@ -22,8 +22,8 @@ jobs:
       run: dotnet pack -c Release -o out -p:PackageVersion=${{ github.event.release.tag_name }}
     
     - name: NuGet source
-      run: dotnet nuget source Add -Name "GitHub" -Source "https://nuget.pkg.github.com/vpapenko/index.json" -UserName vpapenko -Password GH_TOKEN
+      run: nuget source Add -Name "GitHub" -Source "https://nuget.pkg.github.com/vpapenko/index.json" -UserName vpapenko -Password GH_TOKEN
       
     - name: NuGet publish HttpWorker v${{ github.event.release.tag_name }}
-      run: dotnet nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg -k ${{ secrets.HttpWorker_GitHub_Actions }} -Source "GitHub"
+      run: nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg -k ${{ secrets.HttpWorker_GitHub_Actions }} -Source "GitHub"
       
