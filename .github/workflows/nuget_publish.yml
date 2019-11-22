@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET Core
+    - name: Setup .NET Core  ${{ github.event.release.tag_name }}
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
@@ -24,6 +24,7 @@ jobs:
     - name: Unit Tests
       run: dotnet test
     - name: Update AssemblyInfo files
-      uses: docker://gittools/gitversion:0.6.1
+      uses: docker://gittools/gitversion:
       with:
-        args: '-updateassemblyinfo -nocache -output buildserver'
+        args: '-updateassemblyinfo -nocache -output buildserver' 
+      
