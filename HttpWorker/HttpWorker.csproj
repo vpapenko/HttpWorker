@@ -12,6 +12,7 @@ HttpWorker provides processing of requests in background and managing of network
     <PackageTags>http-client queue background-worker dotnet netstandard csharp c-sharp</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/vpapenko/HttpWorker</PackageProjectUrl>
+    <Configurations>Debug;Release;ReleaseNuGet</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
