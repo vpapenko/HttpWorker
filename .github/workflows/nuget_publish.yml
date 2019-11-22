@@ -28,5 +28,5 @@ jobs:
       run: nuget source Add -Name "GitHub" -Source "https://nuget.pkg.github.com/vpapenko/index.json" -UserName vpapenko -Password GH_TOKEN
       
     - name: NuGet publish HttpWorker v${{ github.event.release.tag_name }}
-      run: nuget push out\HttpWorker.${{ github.event.release.tag_name }}.nupkg -ApiKey ${{ secrets.HttpWorker_NuGet_API_Key }} -Source "GitHub"
+      run: dotnet nuget push out\HttpWorker.${{ github.event.release.tag_name }}.nupkg -k ${{ secrets.HttpWorker_NuGet_API_Key }} -s "GitHub"
       
