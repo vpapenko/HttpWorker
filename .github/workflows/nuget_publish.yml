@@ -21,8 +21,8 @@ jobs:
     - name: Dotnet pack
       run: dotnet pack -c Release -o out -p:PackageVersion=${{ github.event.release.tag_name }}
     
-    - name: NuGet publish HttpWorker v${{ github.event.release.tag_name }}
-      run: nuget source Add -Name "GitHub" -Source "https://nuget.pkg.github.com/vpapenko/index.json" -UserName vpapenko -Password GH_TOKEN
+    - name: NuGet source
+      run: dotnet nuget source Add -Name "GitHub" -Source "https://nuget.pkg.github.com/vpapenko/index.json" -UserName vpapenko -Password GH_TOKEN
       
     - name: NuGet publish HttpWorker v${{ github.event.release.tag_name }}
       run: dotnet nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg -k ${{ secrets.HttpWorker_GitHub_Actions }} -Source "GitHub"
