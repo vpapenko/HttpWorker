@@ -12,7 +12,7 @@ jobs:
       with:
         dotnet-version: 2.2.108
     
-    - name: Build with dotnet
+    - name: Build with dotnet %payload.release.tag_name%
       run: dotnet build --configuration Release
     
     - name: Update AssemblyInfo files
@@ -23,4 +23,4 @@ jobs:
     - name: Pack with dotnet
       run: dotnet pack -c Release -o out  
     - name: Pack with dotnet
-      run: dotnet nuget push "HttpWorker" -k ${{ secrets.HttpWorker_GitHub_Actions }}
+      run: dotnet nuget push "HttpWorker" ${{  -k ${{ secrets.HttpWorker_GitHub_Actions }}
