@@ -15,6 +15,9 @@ jobs:
       with:
         dotnet-version: 2.2.108
     
+    - name: tmp
+      run: ECHO %cd%
+      
     - name: Build with dotnet
       run: dotnet build --configuration ReleaseNuget
   
