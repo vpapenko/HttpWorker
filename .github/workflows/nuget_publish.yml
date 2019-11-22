@@ -22,7 +22,7 @@ jobs:
       run: dotnet build --configuration ReleaseNuget
   
     - name: Dotnet pack
-      run: dotnet pack -c ReleaseNuget -o .\ -p:PackageVersion=${{ github.event.release.tag_name }}
+      run: dotnet pack -c ReleaseNuget -o out -p:PackageVersion=${{ github.event.release.tag_name }}
     
     - name: Setup Nuget.exe
       uses: warrenbuckley/Setup-Nuget@v1
@@ -31,5 +31,5 @@ jobs:
       run: nuget source Add -Name "GitHub" -Source "https://nuget.pkg.github.com/vpapenko/index.json" -UserName vpapenko -Password GH_TOKEN
       
     - name: NuGet publish HttpWorker v${{ github.event.release.tag_name }}
-      run: nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg -ApiKey ${{ secrets.HttpWorker_GitHub_Actions }} -Source "GitHub"
+      run: nuget push out\HttpWorker.${{ github.event.release.tag_name }}.nupkg -ApiKey ${{ secrets.HttpWorker_GitHub_Actions }} -Source "GitHub"
       
