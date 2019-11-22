@@ -1,4 +1,4 @@
-name: Publish to NuGet v${{ github.event.release.tag_name }}
+name: Publish to NuGet
 
 on: 
   release:
@@ -21,6 +21,6 @@ jobs:
     - name: Dotnet pack
       run: dotnet pack -c Release -o out -p:PackageVersion=${{ github.event.release.tag_name }}
     
-    - name: Dotnet nuget push
+    - name: NuGet publish HttpWorker v${{ github.event.release.tag_name }}
       run: dotnet nuget push HttpWorker.${{ github.event.release.tag_name }}.nupkg -k ${{ secrets.HttpWorker_GitHub_Actions }}
       
