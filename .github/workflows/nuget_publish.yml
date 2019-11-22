@@ -14,10 +14,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
-    
-    - name: tmp
-      run: cd
-      
+
     - name: Build with dotnet
       run: dotnet build --configuration ReleaseNuget
   
