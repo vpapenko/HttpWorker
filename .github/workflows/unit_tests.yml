@@ -6,7 +6,7 @@ jobs:
     
     strategy:
       matrix:
-        dotnet: [ '2.2', '3.0' ]
+        dotnet: [ '2.2.103', '3.0.100' ]
     
     name: Dotnet ${{ matrix.dotnet }} sample
     
