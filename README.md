@@ -3,12 +3,13 @@
 ![](https://github.com/vpapenko/HttpWorker/workflows/Tests/badge.svg)
 
 # HttpWorker
-Library to create HTTP API clients.
+HttpWorker is the library to create HTTP API clients.
 
 HttpWorker provides processing of requests in background and managing of network failures.
 It has statuses like `CountOfUnprocessedHttpCalls`, `NetworkNotAvailable`, `LongOperationInProcess`, `Working`.
 
 # How to use
+
 * Directly by using of `ApiClientBase`.
 
   Use
@@ -17,6 +18,7 @@ It has statuses like `CountOfUnprocessedHttpCalls`, `NetworkNotAvailable`, `Long
 `async AddDeleteCall`
 `async AddPutCall`
 to add http call to queue.
+
 * Inheritance
 
-  Inherit ApiClientBase to create cpecific API client like in [JSONPlaceholderTestAPI.cs](TestAPI/JSONPlaceholderTestAPI.cs)
+  Inherit ApiClientBase to create specific API client like in [JSONPlaceholderTestAPI.cs](TestAPI/JSONPlaceholderTestAPI.cs)
