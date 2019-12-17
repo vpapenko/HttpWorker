@@ -1,22 +1,17 @@
-using HttpWorker;
-using HttpWorkerNUnitTests.Common;
-using NUnit.Framework;
-using RichardSzalay.MockHttp;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using HttpWorker;
+using HttpWorkerNUnitTests.Common;
+using NUnit.Framework;
+using RichardSzalay.MockHttp;
 
-namespace Tests
+namespace HttpWorkerNUnitTests
 {
     public class HttpWorkerUnitTest
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
         public async Task HttpWorkerTestSimpleRun()
         {
@@ -25,7 +20,7 @@ namespace Tests
             var client = mockHttp.ToHttpClient();
             var worker = new Worker(client);
 
-            HttpCall<int> call = new HttpCall<int>(Converter.IntConverterStatic)
+            var call = new HttpCall<int>(Converter.IntConverterStatic)
             {
                 HttpType = HttpCallTypeEnum.Get,
                 Uri = new Uri("http://test")
@@ -112,8 +107,8 @@ namespace Tests
 
             Assert.AreEqual(false, worker.Working);
             Assert.AreEqual(false, worker.NetworkNotAvailable);
-            Run(worker, 100).RunAndForget();
-            Run(worker, 100).RunAndForget();
+            Run(worker).RunAndForget();
+            Run(worker).RunAndForget();
             Thread.Sleep(100);
             Assert.AreEqual(true, worker.Working);
             Thread.Sleep(1000);
@@ -125,7 +120,7 @@ namespace Tests
             Assert.AreEqual(false, worker.Working);
         }
 
-        bool _networkNotAvailable = false;
+        private bool _networkNotAvailable;
         public Task<HttpResponseMessage> GetHttpResponseMessage()
         {
             if (_networkNotAvailable)
@@ -142,7 +137,7 @@ namespace Tests
         public async Task Run(int id, Worker worker, int sleepTime = 100)
         {
             var converter = new Converter() { SleepTime = sleepTime };
-            HttpCall<int> call = new HttpCall<int>(converter.IntConverter)
+            var call = new HttpCall<int>(converter.IntConverter)
             {
                 HttpType = HttpCallTypeEnum.Get,
                 Uri = new Uri($"http://test/{id}")
@@ -153,7 +148,7 @@ namespace Tests
         }
         public async Task Run(Worker worker, int sleepTime = 100)
         {
-            HttpCall call = new HttpCall()
+            var call = new HttpCall()
             {
                 HttpType = HttpCallTypeEnum.Get,
                 Uri = new Uri($"http://test")

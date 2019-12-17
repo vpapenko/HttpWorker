@@ -3,8 +3,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace TestAPI
@@ -12,10 +10,10 @@ namespace TestAPI
     /// <summary>
     /// Test implementation of JSONPlaceholder API
     /// </summary>
-    public class JSONPlaceholderTestAPI
+    public class JsonPlaceholderTestApi
         : ApiClientBase
     {
-        private static readonly Uri baseUrl = new Uri(@"https://jsonplaceholder.typicode.com/");
+        private static readonly Uri BaseUrl = new Uri(@"https://jsonplaceholder.typicode.com/");
 
         /// <summary>
         /// Method to test one of the test API of JSONPlaceholder
@@ -24,7 +22,7 @@ namespace TestAPI
         /// <returns></returns>
         public async Task<JObject> TestMethod1(int id)
         {
-            var uri = new Uri(baseUrl, string.Format("posts/{0}", id.ToString()));
+            var uri = new Uri(BaseUrl, $"posts/{id.ToString()}");
             return await AddGetCall(uri, TestMethod1ResponseConverter);
         }
 
@@ -38,7 +36,7 @@ namespace TestAPI
         {
             if(statusCode != HttpStatusCode.OK)
             {
-                throw new Exception(string.Format("Invalid status code {0}", statusCode.ToString()));
+                throw new Exception($"Invalid status code {statusCode.ToString()}");
             }
             try
             {
