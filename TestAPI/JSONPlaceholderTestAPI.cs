@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace TestAPI
@@ -29,18 +30,18 @@ namespace TestAPI
         /// <summary>
         /// Function to convert string HTTP response to JObject
         /// </summary>
-        /// <param name="statusCode">HTTP status code of the request</param>
-        /// <param name="response">Response from server</param>
+        /// <param name="response">HTTP response of operation</param>
+        /// <param name="content">Response from server</param>
         /// <returns></returns>
-        private JObject TestMethod1ResponseConverter(HttpStatusCode statusCode, string response)
+        private JObject TestMethod1ResponseConverter(HttpResponseMessage response, string content)
         {
-            if(statusCode != HttpStatusCode.OK)
+            if(response.StatusCode != HttpStatusCode.OK)
             {
-                throw new Exception($"Invalid status code {statusCode.ToString()}");
+                throw new Exception($"Invalid status code {response.StatusCode}");
             }
             try
             {
-                return JsonConvert.DeserializeObject<JObject>(response);
+                return JsonConvert.DeserializeObject<JObject>(content);
             }
             catch (JsonReaderException)
             {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -14,7 +13,7 @@ namespace HttpWorker.Interfaces
     public interface IHttpCall
     {
         Task Task { get; }
-        void SetResult(HttpStatusCode statusCode, string responseString);
+        void SetResult(HttpResponseMessage response, string content);
         HttpCallTypeEnum HttpType { get; set; }
         Uri Uri { get; set; }
         HttpContent Content { get; set; }

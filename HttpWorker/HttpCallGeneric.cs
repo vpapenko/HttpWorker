@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HttpWorker.Interfaces;
@@ -14,16 +13,16 @@ namespace HttpWorker
     public class HttpCall<TResult>
         : IHttpCall<TResult>
     {
-        private readonly Func<HttpStatusCode, string, TResult> _responseConverter;
+        private readonly Func<HttpResponseMessage, string, TResult> _responseConverter;
         private readonly TaskCompletionSource<TResult> _taskCompletionSource = new TaskCompletionSource<TResult>();
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="responseConverter">Function to convert HTTP response to type T</param>
-        public HttpCall(Func<HttpStatusCode, string, TResult> responseConverter)
+        public HttpCall(Func<HttpResponseMessage, string, TResult> responseConverter)
         {
-            this._responseConverter = responseConverter ?? throw new ArgumentNullException(nameof(responseConverter));
+            _responseConverter = responseConverter ?? throw new ArgumentNullException(nameof(responseConverter));
         }
 
         public HttpCallTypeEnum HttpType { get; set; }
@@ -36,13 +35,14 @@ namespace HttpWorker
         /// <summary>
         /// Function to set result of this call.
         /// </summary>
-        /// <param name="statusCode"></param>
-        /// <param name="response"></param>
-        public void SetResult(HttpStatusCode statusCode, string response)
+        /// <param name="response">HTTP response of operation</param>
+        /// <param name="content">Response from server</param>
+        /// <returns></returns>
+        public void SetResult(HttpResponseMessage response, string content)
         {
             try
             {
-                var result = _responseConverter(statusCode, response);
+                var result = _responseConverter(response, content);
                 _taskCompletionSource.SetResult(result);
             }
             catch (Exception ex)

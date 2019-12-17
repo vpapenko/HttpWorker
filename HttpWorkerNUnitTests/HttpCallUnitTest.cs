@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using HttpWorker;
 using HttpWorkerNUnitTests.Common;
@@ -15,7 +16,8 @@ namespace HttpWorkerNUnitTests
             var httpCall = new HttpCall<int>(Converter.IntConverterStatic);
             Assert.AreEqual(TaskStatus.WaitingForActivation, httpCall.Task.Status);
             Assert.AreEqual(null, httpCall.Task.Exception);
-            httpCall.SetResult(HttpStatusCode.OK, "10");
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            httpCall.SetResult(response, "10");
             Assert.AreEqual(TaskStatus.RanToCompletion, httpCall.Task.Status);
             Assert.AreEqual(10, httpCall.Task.Result);
         }
@@ -26,7 +28,8 @@ namespace HttpWorkerNUnitTests
             var httpCall = new HttpCall<int>(Converter.IntConverterStatic);
             Assert.AreEqual(TaskStatus.WaitingForActivation, httpCall.Task.Status);
             Assert.AreEqual(null, httpCall.Task.Exception);
-            httpCall.SetResult(HttpStatusCode.BadRequest, "10");
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            httpCall.SetResult(response, "10");
             Assert.AreEqual(TaskStatus.Faulted, httpCall.Task.Status);
             Assert.AreEqual(typeof(TestException), httpCall.Task.Exception.InnerException.GetType());
         }
@@ -37,7 +40,8 @@ namespace HttpWorkerNUnitTests
             var httpCall = new HttpCall<int>(Converter.IntConverterStatic);
             Assert.AreEqual(TaskStatus.WaitingForActivation, httpCall.Task.Status);
             Assert.AreEqual(null, httpCall.Task.Exception);
-            httpCall.SetResult(HttpStatusCode.OK, "a");
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            httpCall.SetResult(response, "a");
             Assert.AreEqual(TaskStatus.Faulted, httpCall.Task.Status);
             Assert.AreEqual(typeof(FormatException), httpCall.Task.Exception.InnerException.GetType());
         }

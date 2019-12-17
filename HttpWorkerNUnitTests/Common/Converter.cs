@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
+﻿using System.Net;
+using System.Net.Http;
 using System.Threading;
 
 namespace HttpWorkerNUnitTests.Common
@@ -10,20 +8,20 @@ namespace HttpWorkerNUnitTests.Common
     {
         public int SleepTime { get; set; }
 
-        public int IntConverter(HttpStatusCode statusCode, string response)
+        public int IntConverter(HttpResponseMessage response, string content)
         {
             Thread.Sleep(SleepTime);
-            return Converter.IntConverterStatic(statusCode, response);
+            return IntConverterStatic(response, content);
         }
 
-        public static int IntConverterStatic(HttpStatusCode statusCode, string response)
+        public static int IntConverterStatic(HttpResponseMessage response, string content)
         {
-            if (statusCode != HttpStatusCode.OK)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
                 throw new TestException();
             }
 
-            return int.Parse(response);
+            return int.Parse(content);
         }
     }
 }

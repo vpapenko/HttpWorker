@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using HttpWorker.Interfaces;
@@ -24,9 +23,10 @@ namespace HttpWorker
         /// <summary>
         /// Function to set result of this call.
         /// </summary>
-        /// <param name="statusCode"></param>
-        /// <param name="response"></param>
-        public void SetResult(HttpStatusCode statusCode, string response)
+        /// <param name="response">HTTP response of operation</param>
+        /// <param name="content">Response from server</param>
+        /// <returns></returns>
+        public void SetResult(HttpResponseMessage response, string content)
         {
             try
             {

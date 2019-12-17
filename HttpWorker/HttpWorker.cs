@@ -217,14 +217,14 @@ namespace HttpWorker
                         throw new NotSupportedException(
                             $"Not supported HttpCallTypeEnum: {HttpCallTypeEnum.Put.ToString()}");
                 }
-                var responseString = "";
+                var content = "";
 
                 if (response?.IsSuccessStatusCode == true)
                 {
-                    responseString = response.Content?.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                    content = response.Content?.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
 
-                if (response != null) call.SetResult(response.StatusCode, responseString);
+                if (response != null) call.SetResult(response, content);
                 return true;
             }
             catch(HttpRequestException)
