@@ -1,45 +1,49 @@
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using HttpWorker;
 using HttpWorkerNUnitTests.Common;
 using NUnit.Framework;
-using System;
-using System.Net;
-using System.Threading.Tasks;
 
-namespace Tests
+namespace HttpWorkerNUnitTests
 {
     public class HttpCallUnitTest
     {
         [Test]
         public void HttpCallTestSimpleResult()
         {
-            HttpCall<int> HhttpCall = new HttpCall<int>(Converter.IntConverterStatic);
-            Assert.AreEqual(TaskStatus.WaitingForActivation, HhttpCall.Task.Status);
-            Assert.AreEqual(null, HhttpCall.Task.Exception);
-            HhttpCall.SetResult(HttpStatusCode.OK, "10");
-            Assert.AreEqual(TaskStatus.RanToCompletion, HhttpCall.Task.Status);
-            Assert.AreEqual(10, HhttpCall.Task.Result);
+            var httpCall = new HttpCall<int>(Converter.IntConverterStatic);
+            Assert.AreEqual(TaskStatus.WaitingForActivation, httpCall.Task.Status);
+            Assert.AreEqual(null, httpCall.Task.Exception);
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            httpCall.SetResult(response, "10");
+            Assert.AreEqual(TaskStatus.RanToCompletion, httpCall.Task.Status);
+            Assert.AreEqual(10, httpCall.Task.Result);
         }
 
         [Test]
         public void HttpCallTestWrongHttpStatusCode()
         {
-            HttpCall<int> HttpCall = new HttpCall<int>(Converter.IntConverterStatic);
-            Assert.AreEqual(TaskStatus.WaitingForActivation, HttpCall.Task.Status);
-            Assert.AreEqual(null, HttpCall.Task.Exception);
-            HttpCall.SetResult(HttpStatusCode.BadRequest, "10");
-            Assert.AreEqual(TaskStatus.Faulted, HttpCall.Task.Status);
-            Assert.AreEqual(typeof(TestException), HttpCall.Task.Exception.InnerException.GetType());
+            var httpCall = new HttpCall<int>(Converter.IntConverterStatic);
+            Assert.AreEqual(TaskStatus.WaitingForActivation, httpCall.Task.Status);
+            Assert.AreEqual(null, httpCall.Task.Exception);
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            httpCall.SetResult(response, "10");
+            Assert.AreEqual(TaskStatus.Faulted, httpCall.Task.Status);
+            Assert.AreEqual(typeof(TestException), httpCall.Task.Exception.InnerException.GetType());
         }
 
         [Test]
         public void HttpCallTestExceptionInResponseConverter()
         {
-            HttpCall<int> HttpCall = new HttpCall<int>(Converter.IntConverterStatic);
-            Assert.AreEqual(TaskStatus.WaitingForActivation, HttpCall.Task.Status);
-            Assert.AreEqual(null, HttpCall.Task.Exception);
-            HttpCall.SetResult(HttpStatusCode.OK, "a");
-            Assert.AreEqual(TaskStatus.Faulted, HttpCall.Task.Status);
-            Assert.AreEqual(typeof(FormatException), HttpCall.Task.Exception.InnerException.GetType());
+            var httpCall = new HttpCall<int>(Converter.IntConverterStatic);
+            Assert.AreEqual(TaskStatus.WaitingForActivation, httpCall.Task.Status);
+            Assert.AreEqual(null, httpCall.Task.Exception);
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            httpCall.SetResult(response, "a");
+            Assert.AreEqual(TaskStatus.Faulted, httpCall.Task.Status);
+            Assert.AreEqual(typeof(FormatException), httpCall.Task.Exception.InnerException.GetType());
         }
     }
 }

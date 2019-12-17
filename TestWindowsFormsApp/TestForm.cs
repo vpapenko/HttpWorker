@@ -8,7 +8,7 @@ namespace TestWindowsFormsApp
 {
     public partial class TestForm : Form
     {
-        readonly JSONPlaceholderTestAPI api = new JSONPlaceholderTestAPI();
+        private readonly JsonPlaceholderTestApi _api = new JsonPlaceholderTestApi();
 
         public TestForm()
         {
@@ -17,7 +17,7 @@ namespace TestWindowsFormsApp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            api.PropertyChanged += Api_PropertyChanged;
+            _api.PropertyChanged += Api_PropertyChanged;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -27,6 +27,7 @@ namespace TestWindowsFormsApp
 
         public async Task Run(int count, bool parallel)
         {
+            if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
             var runId = Guid.NewGuid();
             for (var id = 1; id <= requestsCount.Value; id++)
             {
@@ -40,26 +41,27 @@ namespace TestWindowsFormsApp
                 }
             }
 
-            AddToListBox(requestListBox, string.Format("{0}. All requests are send.", runId.ToString()));
+            AddToListBox(requestListBox, $"{runId.ToString()}. All requests are send.");
         }
 
         public async Task Run(Guid runId, int id)
         {
-            AddToListBox(requestListBox, string.Format("{0}. Request for id {1}", runId.ToString(), id.ToString()));
+            AddToListBox(requestListBox, $"{runId.ToString()}. Request for id {id.ToString()}");
             try
             {
-                var r = await api.TestMethod1(id);
-                AddToListBox(responseListBox, string.Format("{0}. Request for id {1} is completed.", runId.ToString(), r["id"].ToString()));
+                var r = await _api.TestMethod1(id);
+                AddToListBox(responseListBox, $"{runId.ToString()}. Request for id {r["id"]} is completed.");
             }
             catch (Exception ex)
             {
-                AddToListBox(responseListBox, string.Format("{0}. Exception while call for id {1}. {2}", runId.ToString(), id.ToString(), ex.ToString()));
+                AddToListBox(responseListBox,
+                    $"{runId.ToString()}. Exception while call for id {id.ToString()}. {ex}");
             }
         }
 
         private void Api_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            JSONPlaceholderTestAPI api = (JSONPlaceholderTestAPI)sender;
+            var api = (JsonPlaceholderTestApi)sender;
             switch (e.PropertyName)
             {
                 case (nameof(api.LongOperationInProcess)):
@@ -72,7 +74,7 @@ namespace TestWindowsFormsApp
                     workingLabel.BackColor = api.Working ? Color.Green : Control.DefaultBackColor;
                     break;
                 case (nameof(api.CountOfUnprocessedHttpCalls)):
-                    unprocessedLabel.Text = string.Format("Unprocessed {0}", api.CountOfUnprocessedHttpCalls);
+                    unprocessedLabel.Text = $"Unprocessed {api.CountOfUnprocessedHttpCalls}";
                     break;
             }
         }

@@ -5,28 +5,29 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using HttpWorker.Interfaces;
 
 namespace HttpWorker
 {
     public class Worker : INotifyPropertyChanged
     {
         ///Dictionary for unprocessed HttpCall
-        readonly HashSet<IHttpCall> httpCallHashSet = new HashSet<IHttpCall>();
+        private readonly HashSet<IHttpCall> _httpCallHashSet = new HashSet<IHttpCall>();
 
         ///Timer to switch LongOperation property.
-        readonly System.Timers.Timer longOperationTimer;
+        private readonly System.Timers.Timer _longOperationTimer;
 
-        int countOfUnprocessedHttpCalls;
-        bool networkNotAvailable;
-        bool longOperationInProcess;
-        bool working;
+        private int _countOfUnprocessedHttpCalls;
+        private bool _networkNotAvailable;
+        private bool _longOperationInProcess;
+        private bool _working;
 
         public Worker()
         {
-            longOperationTimer = new System.Timers.Timer(20);
-            longOperationTimer.Elapsed += LongOperationTimer_Elapsed;
-            longOperationTimer.AutoReset = false;
-            longOperationTimer.Enabled = false;
+            _longOperationTimer = new System.Timers.Timer(20);
+            _longOperationTimer.Elapsed += LongOperationTimer_Elapsed;
+            _longOperationTimer.AutoReset = false;
+            _longOperationTimer.Enabled = false;
         }
 
         public Worker(HttpClient client)
@@ -38,24 +39,19 @@ namespace HttpWorker
         public event PropertyChangedEventHandler PropertyChanged;
 
         ///HTTP client. Can be addition setup in API implementation
-        public HttpClient Client { get; private set; } = new HttpClient();
+        public HttpClient Client { get; } = new HttpClient();
 
         /// <summary>
         /// Count of unprocessed HTTP calls.
         /// </summary>
         public int CountOfUnprocessedHttpCalls
         {
-            get
-            {
-                return countOfUnprocessedHttpCalls;
-            }
+            get => _countOfUnprocessedHttpCalls;
             private set
             {
-                if (countOfUnprocessedHttpCalls != value)
-                {
-                    countOfUnprocessedHttpCalls = value;
-                    OnPropertyChanged();
-                }
+                if (_countOfUnprocessedHttpCalls == value) return;
+                _countOfUnprocessedHttpCalls = value;
+                OnPropertyChanged();
             }
         }
 
@@ -66,11 +62,17 @@ namespace HttpWorker
         {
             get
             {
-                return longOperationTimer.Interval;
+                lock (_httpCallHashSet)
+                {
+                    return _longOperationTimer.Interval;
+                }
             }
             set
             {
-                longOperationTimer.Interval = value;
+                lock (_httpCallHashSet)
+                {
+                    _longOperationTimer.Interval = value;
+                }
             }
         }
 
@@ -79,17 +81,12 @@ namespace HttpWorker
         /// </summary>
         public bool NetworkNotAvailable
         {
-            get
-            {
-                return networkNotAvailable;
-            }
+            get => _networkNotAvailable;
             private set
             {
-                if (networkNotAvailable != value)
-                {
-                    networkNotAvailable = value;
-                    OnPropertyChanged();
-                }
+                if (_networkNotAvailable == value) return;
+                _networkNotAvailable = value;
+                OnPropertyChanged();
             }
         }
 
@@ -98,17 +95,12 @@ namespace HttpWorker
         /// </summary>
         public bool LongOperationInProcess
         {
-            get
-            {
-                return longOperationInProcess;
-            }
+            get => _longOperationInProcess;
             private set
             {
-                if (longOperationInProcess != value)
-                {
-                    longOperationInProcess = value;
-                    OnPropertyChanged();
-                }
+                if (_longOperationInProcess == value) return;
+                _longOperationInProcess = value;
+                OnPropertyChanged();
             }
         }
 
@@ -117,17 +109,12 @@ namespace HttpWorker
         /// </summary>
         public bool Working
         {
-            get
-            {
-                return working;
-            }
+            get => _working;
             private set
             {
-                if (working != value)
-                {
-                    working = value;
-                    OnPropertyChanged();
-                }
+                if (_working == value) return;
+                _working = value;
+                OnPropertyChanged();
             }
         }
 
@@ -161,7 +148,7 @@ namespace HttpWorker
         /// <param name="call"></param>
         public async Task<TResult> AddCall<TResult>(IHttpCall<TResult> call)
         {
-            TResult result = await AddAndCall(call);
+            var result = await AddAndCall(call);
             Remove(call);
             return result;
         }
@@ -174,12 +161,12 @@ namespace HttpWorker
         /// <summary>
         /// Try to process HttpCall until success or manual stop.
         /// </summary>
-        /// <param name="call">HttpCall to process</param>
+        /// <param name="callObject">HttpCall to process</param>
         private void WorkUntilSuccess(object callObject)
         {
-            IHttpCall call = (IHttpCall)callObject;
-            long count = 0;
-            int sleep = 0;
+            var call = (IHttpCall)callObject;
+            var count = 0;
+            var sleep = 0;
             while (true)
             {
                 //Counting attempts, updating statuses and try to process request.
@@ -194,12 +181,10 @@ namespace HttpWorker
                     sleep = RetrySleepTime1;
                 }
                 Thread.Sleep(sleep);
-                bool success = ProcessCall(call);
-                if (success)
-                {
-                    NetworkNotAvailable = false;
-                    return;
-                }
+                var success = ProcessCall(call);
+                if (!success) continue;
+                NetworkNotAvailable = false;
+                return;
 
             }
         }
@@ -213,7 +198,7 @@ namespace HttpWorker
         {
             try
             {
-                HttpResponseMessage response = null;
+                HttpResponseMessage response;
                 switch (call.HttpType)
                 {
                     case HttpCallTypeEnum.Get:
@@ -229,17 +214,17 @@ namespace HttpWorker
                         response = Client.PutAsync(call.Uri, call.Content).ConfigureAwait(false).GetAwaiter().GetResult();
                         break;
                     default:
-                        throw new NotSupportedException(string.Format("Not supported HttpCallTypeEnum: {0}"
-                            , HttpCallTypeEnum.Put.ToString()));
+                        throw new NotSupportedException(
+                            $"Not supported HttpCallTypeEnum: {HttpCallTypeEnum.Put.ToString()}");
                 }
-                string responseString = "";
+                var content = "";
 
                 if (response?.IsSuccessStatusCode == true)
                 {
-                    responseString = response.Content?.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                    content = response.Content?.ReadAsStringAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
 
-                call.SetResult(response.StatusCode, responseString);
+                if (response != null) call.SetResult(response, content);
                 return true;
             }
             catch(HttpRequestException)
@@ -250,28 +235,28 @@ namespace HttpWorker
 
         private async Task<TResult> AddAndCall<TResult>(IHttpCall<TResult> call)
         {
-            Task<TResult> task = call.Task;
+            var task = call.Task;
             Add(call);
-            TResult result = await task;
+            var result = await task;
             return result;
         }
 
         private async Task AddAndCall(IHttpCall call)
         {
-            Task task = call.Task;
+            var task = call.Task;
             Add(call);
             await task;
         }
 
         private void Add(IHttpCall call)
         {
-            lock (httpCallHashSet)
+            lock (_httpCallHashSet)
             {
-                httpCallHashSet.Add(call);
-                CountOfUnprocessedHttpCalls = httpCallHashSet.Count;
-                if (!longOperationTimer.Enabled)
+                _httpCallHashSet.Add(call);
+                CountOfUnprocessedHttpCalls = _httpCallHashSet.Count;
+                if (!_longOperationTimer.Enabled)
                 {
-                    longOperationTimer.Start();
+                    _longOperationTimer.Start();
                 }
                 Working = true;
                 ThreadPool.QueueUserWorkItem(WorkUntilSuccess, call);
@@ -285,16 +270,16 @@ namespace HttpWorker
         /// <param name="call">Processed call</param>
         internal void Remove(IHttpCall call)
         {
-            lock (httpCallHashSet)
+            lock (_httpCallHashSet)
             {
-                httpCallHashSet.Remove(call);
-                if (httpCallHashSet.Count == 0)
+                _httpCallHashSet.Remove(call);
+                if (_httpCallHashSet.Count == 0)
                 {
-                    longOperationTimer.Stop();
+                    _longOperationTimer.Stop();
                     LongOperationInProcess = false;
                     Working = false;
                 }
-                CountOfUnprocessedHttpCalls = httpCallHashSet.Count;
+                CountOfUnprocessedHttpCalls = _httpCallHashSet.Count;
             }
         }
 

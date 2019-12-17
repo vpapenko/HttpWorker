@@ -4,23 +4,23 @@ using TestAPI;
 
 namespace TestConsoleApp
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
-            var asyncUI = new AsyncUI();
-            asyncUI.Start();
+            var asyncUi = new AsyncUi();
+            asyncUi.Start();
         }
 
         /// <summary>
         /// Class for simple async UI.
         /// </summary>
-        private class AsyncUI
+        private class AsyncUi
         {
-            JSONPlaceholderTestAPI api = new JSONPlaceholderTestAPI();
-            public AsyncUI()
+            readonly JsonPlaceholderTestApi _api = new JsonPlaceholderTestApi();
+            public AsyncUi()
             {
-                api.PropertyChanged += Api_PropertyChanged;
+                _api.PropertyChanged += Api_PropertyChanged;
             }
 
             public void Start()
@@ -28,7 +28,7 @@ namespace TestConsoleApp
                 Console.WriteLine("How many requests? Try to turn Internet connection off while process of requests.");
                 while (true)
                 {
-                    if (int.TryParse(Console.ReadLine(), out int count))
+                    if (int.TryParse(Console.ReadLine(), out var count))
                     {
                         //Run all requests and don't wait for results.
                         for (var i = 1; i <= count; i++)
@@ -44,17 +44,17 @@ namespace TestConsoleApp
                 }
             }
 
-            public async Task Run(int id)
+            private async Task Run(int id)
             {
                 Console.WriteLine("Request for id {0}", id.ToString());
                 try
                 {
-                    var r = await api.TestMethod1(id);
-                    Console.WriteLine("Request for id {0} is completed.", r["id"].ToString());
+                    var r = await _api.TestMethod1(id);
+                    Console.WriteLine("Request for id {0} is completed.", r["id"]);
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine("Exception while call for id {0}. {1}", id.ToString(), ex.ToString());
+                    Console.WriteLine("Exception while call for id {0}. {1}", id.ToString(), ex);
                 }
             }
 
@@ -65,7 +65,7 @@ namespace TestConsoleApp
             /// <param name="e"></param>
             private static void Api_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
             {
-                JSONPlaceholderTestAPI api = (JSONPlaceholderTestAPI)sender;
+                var api = (JsonPlaceholderTestApi)sender;
                 switch (e.PropertyName)
                 {
                     case (nameof(api.LongOperationInProcess)):

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using HttpWorker.Interfaces;
 
 namespace HttpWorker
 {
@@ -14,28 +12,29 @@ namespace HttpWorker
     public class HttpCall
         : IHttpCall
     {
-        TaskCompletionSource<bool> TaskCompletionSource = new TaskCompletionSource<bool>();
+        private readonly TaskCompletionSource<bool> _taskCompletionSource = new TaskCompletionSource<bool>();
 
         public HttpCallTypeEnum HttpType { get; set; }
         public Uri Uri { get; set; }
         public HttpContent Content { get; set; }
         
-        public Task Task { get { return TaskCompletionSource.Task; } }
+        public Task Task => _taskCompletionSource.Task;
 
         /// <summary>
         /// Function to set result of this call.
         /// </summary>
-        /// <param name="statusCode"></param>
-        /// <param name="response"></param>
-        public void SetResult(HttpStatusCode statusCode, string response)
+        /// <param name="response">HTTP response of operation</param>
+        /// <param name="content">Response from server</param>
+        /// <returns></returns>
+        public void SetResult(HttpResponseMessage response, string content)
         {
             try
             {
-                TaskCompletionSource.SetResult(true);
+                _taskCompletionSource.SetResult(true);
             }
             catch (Exception ex)
             {
-                TaskCompletionSource.SetException(ex);
+                _taskCompletionSource.SetException(ex);
             }
         }
     }
