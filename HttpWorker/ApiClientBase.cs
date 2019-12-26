@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
@@ -36,6 +35,9 @@ namespace HttpWorker
             }
         }
 
+        /// <summary>
+        /// Count of unprocessed HTTP calls.
+        /// </summary>
         public int CountOfUnprocessedHttpCalls
         {
             get
@@ -44,6 +46,9 @@ namespace HttpWorker
             }
         }
 
+        /// <summary>
+        /// Indicate that network is not available
+        /// </summary>
         public bool NetworkNotAvailable
         {
             get
@@ -52,6 +57,9 @@ namespace HttpWorker
             }
         }
 
+        /// <summary>
+        /// Indicate that long operation is in process
+        /// </summary>
         public bool LongOperationInProcess
         {
             get
@@ -60,6 +68,9 @@ namespace HttpWorker
             }
         }
 
+        /// <summary>
+        /// Indicate that worker is working.
+        /// </summary>
         public bool Working
         {
             get
@@ -67,7 +78,52 @@ namespace HttpWorker
                 return httpWorker.Working;
             }
         }
-        
+
+        /// <summary>
+        /// Indicate that long time operation is in process
+        /// </summary>
+        public double LongOperationStartTime
+        {
+            get
+            {
+                return httpWorker.LongOperationStartTime;
+            }
+            set
+            {
+                httpWorker.LongOperationStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
+        /// Also after this count of attempt we set NetworkNotAvailable statuses.
+        /// </summary>
+        public int RetrySleepTimer1 
+        {
+            get => httpWorker.RetrySleepTimer1;
+            set => httpWorker.RetrySleepTimer1 = value;
+        }
+        public int RetrySleepTime1 
+        {
+            get => httpWorker.RetrySleepTime1;
+            set => httpWorker.RetrySleepTime1 = value;
+        }
+
+        /// <summary>
+        /// If count of unsuccessful attempts are higher we slow down more.
+        /// </summary>
+        public int RetrySleepTimer2 
+        {
+            get => httpWorker.RetrySleepTimer2;
+            set => httpWorker.RetrySleepTimer2 = value;
+        }
+        public int RetrySleepTime2
+        {
+            get => httpWorker.RetrySleepTime2;
+            set => httpWorker.RetrySleepTime2 = value;
+        }
+
+
         /// <summary>
         /// Add HTTP get to queue
         /// </summary>
