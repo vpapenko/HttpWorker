@@ -4,7 +4,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace TestAPI
@@ -12,10 +11,10 @@ namespace TestAPI
     /// <summary>
     /// Test implementation of JSONPlaceholder API
     /// </summary>
-    public class JSONPlaceholderTestAPI
+    public class JsonPlaceholderTestApi
         : ApiClientBase
     {
-        private static readonly Uri baseUrl = new Uri(@"https://jsonplaceholder.typicode.com/");
+        private static readonly Uri BaseUrl = new Uri(@"https://jsonplaceholder.typicode.com/");
 
         /// <summary>
         /// Method to test one of the test API of JSONPlaceholder
@@ -24,25 +23,25 @@ namespace TestAPI
         /// <returns></returns>
         public async Task<JObject> TestMethod1(int id)
         {
-            var uri = new Uri(baseUrl, string.Format("posts/{0}", id.ToString()));
+            var uri = new Uri(BaseUrl, $"posts/{id.ToString()}");
             return await AddGetCall(uri, TestMethod1ResponseConverter);
         }
 
         /// <summary>
         /// Function to convert string HTTP response to JObject
         /// </summary>
-        /// <param name="statusCode">HTTP status code of the request</param>
-        /// <param name="response">Response from server</param>
+        /// <param name="response">HTTP response of operation</param>
+        /// <param name="content">Response from server</param>
         /// <returns></returns>
-        private JObject TestMethod1ResponseConverter(HttpStatusCode statusCode, string response)
+        private JObject TestMethod1ResponseConverter(HttpResponseMessage response, string content)
         {
-            if(statusCode != HttpStatusCode.OK)
+            if(response.StatusCode != HttpStatusCode.OK)
             {
-                throw new Exception(string.Format("Invalid status code {0}", statusCode.ToString()));
+                throw new Exception($"Invalid status code {response.StatusCode}");
             }
             try
             {
-                return JsonConvert.DeserializeObject<JObject>(response);
+                return JsonConvert.DeserializeObject<JObject>(content);
             }
             catch (JsonReaderException)
             {

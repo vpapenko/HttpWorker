@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
@@ -14,11 +13,11 @@ namespace HttpWorker
     /// </summary>
     public class ApiClientBase : INotifyPropertyChanged
     {
-        readonly Worker httpWorker = new Worker();
+        readonly Worker _httpWorker = new Worker();
 
         public ApiClientBase()
         {
-            httpWorker.PropertyChanged += HttpWorker_PropertyChanged;
+            _httpWorker.PropertyChanged += HttpWorker_PropertyChanged;
         }
 
 
@@ -27,173 +26,86 @@ namespace HttpWorker
         /// <summary>
         /// Allow to setup HTTP header of requests.
         /// </summary>
-        public HttpRequestHeaders DefaultRequestHeaders
-        {
-            get
-            {
-                return httpWorker.Client.DefaultRequestHeaders;
-            }
-        }
+        public HttpRequestHeaders DefaultRequestHeaders => _httpWorker.Client.DefaultRequestHeaders;
 
-        /// <summary>
-        /// Count of unprocessed HTTP calls.
-        /// </summary>
-        public int CountOfUnprocessedHttpCalls
-        {
-            get
-            {
-                return httpWorker.CountOfUnprocessedHttpCalls;
-            }
-        }
+        public int CountOfUnprocessedHttpCalls => _httpWorker.CountOfUnprocessedHttpCalls;
 
-        /// <summary>
-        /// Indicate that network is not available
-        /// </summary>
-        public bool NetworkNotAvailable
-        {
-            get
-            {
-                return httpWorker.NetworkNotAvailable;
-            }
-        }
+        public bool NetworkNotAvailable => _httpWorker.NetworkNotAvailable;
 
-        /// <summary>
-        /// Indicate that long operation is in process
-        /// </summary>
-        public bool LongOperationInProcess
-        {
-            get
-            {
-                return httpWorker.LongOperationInProcess;
-            }
-        }
+        public bool LongOperationInProcess => _httpWorker.LongOperationInProcess;
 
-        /// <summary>
-        /// Indicate that worker is working.
-        /// </summary>
-        public bool Working
-        {
-            get
-            {
-                return httpWorker.Working;
-            }
-        }
-
-        /// <summary>
-        /// Indicate that long time operation is in process
-        /// </summary>
-        public double LongOperationStartTime
-        {
-            get
-            {
-                return httpWorker.LongOperationStartTime;
-            }
-            set
-            {
-                httpWorker.LongOperationStartTime = value;
-            }
-        }
-
-        /// <summary>
-        /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
-        /// Also after this count of attempt we set NetworkNotAvailable statuses.
-        /// </summary>
-        public int RetrySleepTimer1 
-        {
-            get => httpWorker.RetrySleepTimer1;
-            set => httpWorker.RetrySleepTimer1 = value;
-        }
-        public int RetrySleepTime1 
-        {
-            get => httpWorker.RetrySleepTime1;
-            set => httpWorker.RetrySleepTime1 = value;
-        }
-
-        /// <summary>
-        /// If count of unsuccessful attempts are higher we slow down more.
-        /// </summary>
-        public int RetrySleepTimer2 
-        {
-            get => httpWorker.RetrySleepTimer2;
-            set => httpWorker.RetrySleepTimer2 = value;
-        }
-        public int RetrySleepTime2
-        {
-            get => httpWorker.RetrySleepTime2;
-            set => httpWorker.RetrySleepTime2 = value;
-        }
-
+        public bool Working => _httpWorker.Working;
 
         /// <summary>
         /// Add HTTP get to queue
         /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
+        /// <typeparam name="TResult">Result of operation</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to TResult type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<TResult> AddGetCall<TResult>(Uri uri, Func<HttpStatusCode, string, TResult> responseConverter)
+        public async Task<TResult> AddGetCall<TResult>(Uri uri, Func<HttpResponseMessage, string, TResult> responseConverter)
         {
-            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
+            var call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Get,
                 Uri = uri
             };
-            return await httpWorker.AddCall<TResult>(call);
+            return await _httpWorker.AddCall(call);
         }
 
         /// <summary>
         /// Add HTTP post to queue
         /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
+        /// <typeparam name="TResult">Result of operation</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
         /// <param name="content">The HTTP request content sent to the server</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to TResult type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<TResult> AddPostCall<TResult>(Uri uri, HttpContent content, Func<HttpStatusCode, string, TResult> responseConverter)
+        public async Task<TResult> AddPostCall<TResult>(Uri uri, HttpContent content, Func<HttpResponseMessage, string, TResult> responseConverter)
         {
-            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
+            var call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Post,
                 Uri = uri,
                 Content = content
             };
-            return await httpWorker.AddCall<TResult>(call);
+            return await _httpWorker.AddCall(call);
         }
 
         /// <summary>
         /// Add HTTP delete to queue
         /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
+        /// <typeparam name="TResult">Result of operation</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to TResult type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<TResult> AddDeleteCall<TResult>(Uri uri, Func<HttpStatusCode, string, TResult> responseConverter)
+        public async Task<TResult> AddDeleteCall<TResult>(Uri uri, Func<HttpResponseMessage, string, TResult> responseConverter)
         {
-            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
+            var call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Delete,
                 Uri = uri
             };
-            return await httpWorker.AddCall<TResult>(call);
+            return await _httpWorker.AddCall(call);
         }
 
         /// <summary>
         /// Add HTTP put to queue
         /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
+        /// <typeparam name="TResult">Result of operation</typeparam>
         /// <param name="uri">The Uri the request is sent to.</param>
         /// <param name="content">The HTTP request content sent to the server</param>
-        /// <param name="responseConverter">Func to convert HTTP response to <TResult> type</param>
+        /// <param name="responseConverter">Func to convert HTTP response to TResult type</param>
         /// <returns>The task object representing the asynchronous operation</returns>
-        public async Task<TResult> AddPutCall<TResult>(Uri uri, HttpContent content, Func<HttpStatusCode, string, TResult> responseConverter)
+        public async Task<TResult> AddPutCall<TResult>(Uri uri, HttpContent content, Func<HttpResponseMessage, string, TResult> responseConverter)
         {
-            HttpCall<TResult> call = new HttpCall<TResult>(responseConverter)
+            var call = new HttpCall<TResult>(responseConverter)
             {
                 HttpType = HttpCallTypeEnum.Put,
                 Uri = uri,
                 Content = content
             };
-            return await httpWorker.AddCall<TResult>(call);
+            return await _httpWorker.AddCall(call);
         }
 
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
@@ -201,23 +113,22 @@ namespace HttpWorker
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         
-        private void HttpWorker_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void HttpWorker_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Worker.NetworkNotAvailable))
+            switch (e.PropertyName)
             {
-                OnPropertyChanged(nameof(NetworkNotAvailable));
-            }
-            else if (e.PropertyName == nameof(Worker.LongOperationInProcess))
-            {
-                OnPropertyChanged(nameof(LongOperationInProcess));
-            }
-            else if (e.PropertyName == nameof(Worker.Working))
-            {
-                OnPropertyChanged(nameof(Working));
-            }
-            else if (e.PropertyName == nameof(Worker.CountOfUnprocessedHttpCalls))
-            {
-                OnPropertyChanged(nameof(CountOfUnprocessedHttpCalls));
+                case nameof(Worker.NetworkNotAvailable):
+                    OnPropertyChanged(nameof(NetworkNotAvailable));
+                    break;
+                case nameof(Worker.LongOperationInProcess):
+                    OnPropertyChanged(nameof(LongOperationInProcess));
+                    break;
+                case nameof(Worker.Working):
+                    OnPropertyChanged(nameof(Working));
+                    break;
+                case nameof(Worker.CountOfUnprocessedHttpCalls):
+                    OnPropertyChanged(nameof(CountOfUnprocessedHttpCalls));
+                    break;
             }
         }
     }
