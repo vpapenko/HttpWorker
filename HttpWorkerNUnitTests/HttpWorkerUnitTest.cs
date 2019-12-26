@@ -94,8 +94,8 @@ namespace HttpWorkerNUnitTests
         public void HttpWorkerTestNetworkNotAvailable()
         {
             var mockHttp = new MockHttpMessageHandler();
-            mockHttp.When("http://test").Respond(GetHttpResponseMessage);
-            mockHttp.When("http://test").Respond(GetHttpResponseMessage);
+            mockHttp.When("http://test").Respond(GetHttpResponseMessage<HttpRequestException>);
+            mockHttp.When("http://test").Respond(GetHttpResponseMessage<HttpRequestException>);
             var client = mockHttp.ToHttpClient();
             var worker = new Worker(client)
             {
@@ -120,12 +120,69 @@ namespace HttpWorkerNUnitTests
             Assert.AreEqual(false, worker.Working);
         }
 
+        [Test]
+        public void HttpWorkerTestNetworkNotAvailableCustomException1()
+        {
+            var mockHttp = new MockHttpMessageHandler();
+            mockHttp.When("http://test").Respond(GetHttpResponseMessage<CustomException>);
+            var client = mockHttp.ToHttpClient();
+            var worker = new Worker(client)
+            {
+                RetrySleepTime1 = 50,
+                RetrySleepTime2 = 50
+            };
+            Exception exception = null;
+            _networkNotAvailable = true;
+
+            Assert.AreEqual(false, worker.Working);
+            Assert.AreEqual(false, worker.NetworkNotAvailable);
+            try
+            {
+                Run(worker).Wait();
+            }
+            catch(Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.AreEqual(false, worker.Working);
+            Assert.AreEqual(false, worker.NetworkNotAvailable);
+            Assert.IsNotNull(exception);
+            Assert.AreEqual(typeof(AggregateException), exception.GetType());
+            Assert.AreEqual(1, ((AggregateException)exception).InnerExceptions.Count);
+            Assert.AreEqual(typeof(CustomException), ((AggregateException)exception).InnerExceptions[0].GetType());
+
+            exception = null;
+            worker.RetryOnExceptions.Add(typeof(CustomException));
+            Task.Run(() => { 
+                Thread.Sleep(1000); 
+                _networkNotAvailable = false; });
+            Task.Run(() => {
+                Thread.Sleep(500);
+                Assert.AreEqual(true, worker.Working);
+                Assert.AreEqual(true, worker.NetworkNotAvailable);
+            });
+
+            try
+            {
+                Run(worker).Wait();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.AreEqual(false, worker.Working);
+            Assert.AreEqual(false, worker.NetworkNotAvailable);
+            Assert.IsNull(exception);
+        }
+
         private bool _networkNotAvailable;
-        public Task<HttpResponseMessage> GetHttpResponseMessage()
+        public Task<HttpResponseMessage> GetHttpResponseMessage<T>() where T : Exception, new()
         {
             if (_networkNotAvailable)
             {
-                throw new HttpRequestException();
+                throw new T();
             }
             else
             {
@@ -146,6 +203,7 @@ namespace HttpWorkerNUnitTests
             var result = await worker.AddCall(call);
             Assert.AreEqual(id, result);
         }
+
         public async Task Run(Worker worker, int sleepTime = 100)
         {
             var call = new HttpCall()
@@ -155,6 +213,10 @@ namespace HttpWorkerNUnitTests
             };
 
             await worker.AddCall(call);
+        }
+
+        class CustomException : Exception
+        {
         }
     }
 }
