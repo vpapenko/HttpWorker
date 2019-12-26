@@ -72,6 +72,7 @@ namespace HttpWorker
                 lock (_httpCallHashSet)
                 {
                     _longOperationTimer.Interval = value;
+                    OnPropertyChanged();
                 }
             }
         }
@@ -119,6 +120,12 @@ namespace HttpWorker
         }
 
         /// <summary>
+        /// List of exception types which expected during http request.
+        /// Worker will retry request if exception of this type occurred.
+        /// </summary>
+        public List<Type> RetryOnExceptions { get; } = new List<Type>() { typeof(HttpRequestException) };
+
+        /// <summary>
         /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
         /// Also after this count of attempt we set NetworkNotAvailable statuses.
         /// </summary>
@@ -138,8 +145,14 @@ namespace HttpWorker
         /// <param name="call"></param>
         public async Task AddCall(IHttpCall call)
         {
-            await AddAndCall(call);
-            Remove(call);
+            try
+            {
+                await AddAndCall(call);
+            }
+            finally
+            {
+                Remove(call);
+            }
         }
 
         /// <summary>
@@ -148,9 +161,15 @@ namespace HttpWorker
         /// <param name="call"></param>
         public async Task<TResult> AddCall<TResult>(IHttpCall<TResult> call)
         {
-            var result = await AddAndCall(call);
-            Remove(call);
-            return result;
+            try
+            {
+                var result = await AddAndCall(call);
+                return result;
+            }
+            finally
+            {
+                Remove(call);
+            }
         }
 
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
@@ -227,9 +246,18 @@ namespace HttpWorker
                 if (response != null) call.SetResult(response, content);
                 return true;
             }
-            catch(HttpRequestException)
+            catch(Exception ex)
             {
-                return false;
+                var type = ex.GetType();
+                if (RetryOnExceptions.Contains(type))
+                {
+                    return false;
+                }
+                else
+                {
+                    call.SetException(ex);
+                    return true;
+                }
             }
         }
 

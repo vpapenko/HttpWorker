@@ -50,5 +50,15 @@ namespace HttpWorker
                 _taskCompletionSource.SetException(ex);
             }
         }
+
+        /// <summary>
+        /// Function to set exception.
+        /// </summary>
+        /// <param name="exception">Exception</param>
+        /// <returns></returns>
+        public void SetException(Exception exception)
+        {
+            _taskCompletionSource.SetException(exception);
+        }
     }
 }
