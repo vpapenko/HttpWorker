@@ -153,7 +153,7 @@ namespace HttpWorkerNUnitTests
             Assert.AreEqual(typeof(CustomException), ((AggregateException)exception).InnerExceptions[0].GetType());
 
             exception = null;
-            worker.RetryOnExceptions.Add(typeof(CustomException));
+            worker.RetryOnException.Add(typeof(CustomException));
             Task.Run(() => { 
                 Thread.Sleep(1000); 
                 _networkNotAvailable = false; });
@@ -180,7 +180,7 @@ namespace HttpWorkerNUnitTests
             mockHttp.When("http://test1").Respond(GetHttpResponseMessageAggregate<CustomException>);
             _networkNotAvailable = true;
             exception = null;
-            worker.RetryOnExceptions.Add(typeof(CustomException));
+            worker.RetryOnException.Add(typeof(CustomException));
             Task.Run(() => {
                 Thread.Sleep(1000);
                 _networkNotAvailable = false;
