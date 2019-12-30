@@ -123,7 +123,7 @@ namespace HttpWorker
         /// List of exception types which expected during http request.
         /// Worker will retry request if exception of this type occurred.
         /// </summary>
-        public List<Type> RetryOnExceptions { get; } = new List<Type>() { typeof(HttpRequestException) };
+        public List<Type> RetryOnException { get; } = new List<Type>() { typeof(HttpRequestException) };
 
         /// <summary>
         /// In case of unsuccessful requests, after this count of attempts we slow down and make sleep before next attempt.
@@ -246,18 +246,25 @@ namespace HttpWorker
                 if (response != null) call.SetResult(response, content);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var type = ex.GetType();
-                if (RetryOnExceptions.Contains(type))
+                if (RetryOnException.Contains(type))
                 {
                     return false;
                 }
-                else
+                else if (type == typeof(AggregateException))
                 {
-                    call.SetException(ex);
-                    return true;
+                    foreach (var innerException in ((AggregateException)ex).InnerExceptions)
+                    {
+                        if (RetryOnException.Contains(innerException.GetType()))
+                        {
+                            return false;
+                        }
+                    }
                 }
+                call.SetException(ex);
+                return true;
             }
         }
 
