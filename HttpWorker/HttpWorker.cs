@@ -246,18 +246,25 @@ namespace HttpWorker
                 if (response != null) call.SetResult(response, content);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 var type = ex.GetType();
                 if (RetryOnExceptions.Contains(type))
                 {
                     return false;
                 }
-                else
+                else if (type == typeof(AggregateException))
                 {
-                    call.SetException(ex);
-                    return true;
+                    foreach (var innerException in ((AggregateException)ex).InnerExceptions)
+                    {
+                        if (RetryOnExceptions.Contains(innerException.GetType()))
+                        {
+                            return false;
+                        }
+                    }
                 }
+                call.SetException(ex);
+                return true;
             }
         }
 

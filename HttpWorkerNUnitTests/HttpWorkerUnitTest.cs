@@ -175,6 +175,34 @@ namespace HttpWorkerNUnitTests
             Assert.AreEqual(false, worker.Working);
             Assert.AreEqual(false, worker.NetworkNotAvailable);
             Assert.IsNull(exception);
+
+
+            mockHttp.When("http://test1").Respond(GetHttpResponseMessageAggregate<CustomException>);
+            _networkNotAvailable = true;
+            exception = null;
+            worker.RetryOnExceptions.Add(typeof(CustomException));
+            Task.Run(() => {
+                Thread.Sleep(1000);
+                _networkNotAvailable = false;
+            });
+            Task.Run(() => {
+                Thread.Sleep(500);
+                Assert.AreEqual(true, worker.Working);
+                Assert.AreEqual(true, worker.NetworkNotAvailable);
+            });
+
+            try
+            {
+                Run(worker, "http://test1").Wait();
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            Assert.AreEqual(false, worker.Working);
+            Assert.AreEqual(false, worker.NetworkNotAvailable);
+            Assert.IsNull(exception);
         }
 
         private bool _networkNotAvailable;
@@ -183,6 +211,19 @@ namespace HttpWorkerNUnitTests
             if (_networkNotAvailable)
             {
                 throw new T();
+            }
+            else
+            {
+                var result = new HttpResponseMessage(HttpStatusCode.OK);
+                return Task.FromResult(result);
+            }
+        }
+
+        public Task<HttpResponseMessage> GetHttpResponseMessageAggregate<T>() where T : Exception, new()
+        {
+            if (_networkNotAvailable)
+            {
+                throw new AggregateException(new[] { new T() });
             }
             else
             {
@@ -204,12 +245,12 @@ namespace HttpWorkerNUnitTests
             Assert.AreEqual(id, result);
         }
 
-        public async Task Run(Worker worker, int sleepTime = 100)
+        public async Task Run(Worker worker, string uri = "http://test")
         {
             var call = new HttpCall()
             {
                 HttpType = HttpCallTypeEnum.Get,
-                Uri = new Uri($"http://test")
+                Uri = new Uri(uri)
             };
 
             await worker.AddCall(call);
