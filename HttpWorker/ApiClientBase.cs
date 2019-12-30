@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,6 +23,12 @@ namespace HttpWorker
 
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// List of exception types which expected during http request.
+        /// Worker will retry request if exception of this type occurred.
+        /// </summary>
+        public List<Type> RetryOnException => _httpWorker.RetryOnException;
 
         /// <summary>
         /// Allow to setup HTTP header of requests.
