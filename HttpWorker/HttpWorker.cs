@@ -249,7 +249,7 @@ namespace HttpWorker
             catch (Exception ex)
             {
                 var type = ex.GetType();
-                if (RetryOnException.Contains(type))
+                if(CompareException(ex))
                 {
                     return false;
                 }
@@ -257,7 +257,7 @@ namespace HttpWorker
                 {
                     foreach (var innerException in ((AggregateException)ex).InnerExceptions)
                     {
-                        if (RetryOnException.Contains(innerException.GetType()))
+                        if (CompareException(innerException))
                         {
                             return false;
                         }
@@ -266,6 +266,19 @@ namespace HttpWorker
                 call.SetException(ex);
                 return true;
             }
+        }
+
+        private bool CompareException(Exception exception)
+        {
+            var exceptionType = exception.GetType();
+            foreach (var e in RetryOnException)
+            {
+                if(exceptionType == e || exceptionType.IsSubclassOf(e))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private async Task<TResult> AddAndCall<TResult>(IHttpCall<TResult> call)
