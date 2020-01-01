@@ -273,7 +273,7 @@ namespace HttpWorker
             var exceptionType = exception.GetType();
             foreach (var e in RetryOnException)
             {
-                if(exceptionType.IsSubclassOf(e))
+                if(exceptionType == e || exceptionType.IsSubclassOf(e))
                 {
                     return true;
                 }
